@@ -1,0 +1,35 @@
+<div class="page">
+  <h1>Your Cart</h1>
+
+  @if (!cart.cartItems().length) {
+    <div class="empty">
+      <p>Your cart is empty.</p>
+      <a routerLink="/shop" class="btn btn--primary">Start Shopping</a>
+    </div>
+  } @else {
+    @for (item of cart.cartItems(); track item.productId + item.variantId) {
+      <div class="card cart-item">
+        <div class="cart-item__image">
+          @if (item.product.imageUrl) { <img [src]="item.product.imageUrl" [alt]="item.product.name"> } @else { <span>{{ item.product.image }}</span> }
+        </div>
+        <div class="cart-item__info">
+          <strong>{{ item.product.name }}</strong>
+          <span class="muted">{{ item.variant.unit }} — ₱{{ item.variant.price.toFixed(2) }}</span>
+          <div class="stepper">
+            <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity - 1)">−</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity + 1)">+</button>
+            <button class="remove" (click)="cart.remove(item.productId, item.variantId)">Remove</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="summary card">
+      <div class="row"><span>Subtotal</span><strong>₱{{ cart.subtotal().toFixed(2) }}</strong></div>
+      <p class="muted" style="font-size:0.8rem">Delivery fee and any discounts are calculated at checkout.</p>
+    </div>
+
+    <button class="btn btn--primary" (click)="goToCheckout()">Proceed to Checkout</button>
+  }
+</div>

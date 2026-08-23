@@ -1,0 +1,113 @@
+<div class="page">
+  <h1>Checkout</h1>
+
+  <div class="steps">
+    <span [class.active]="step() === 1">1. Address</span>
+    <span [class.active]="step() === 2">2. Delivery</span>
+    <span [class.active]="step() === 3">3. Payment</span>
+    <span [class.active]="step() === 4">4. Review</span>
+  </div>
+
+  @if (step() === 1) {
+    <div class="card">
+      <h2>Shipping Address</h2>
+      @for (a of auth.currentUser()?.addresses; track a.id) {
+        <label class="option">
+          <input type="radio" name="address" [value]="a.id" [(ngModel)]="addressId">
+          <div><strong>{{ a.label || 'Home' }}</strong><br><span class="muted">{{ a.street }}, {{ a.city }}</span></div>
+        </label>
+      }
+      <button class="btn btn--outline" style="margin-top:0.75rem" (click)="showNewAddressForm = !showNewAddressForm">
+        + Add New Address
+      </button>
+
+      @if (showNewAddressForm) {
+        <div class="new-address">
+          <div class="form-group"><label>Label</label><input [(ngModel)]="newAddress.label" placeholder="Home, Office…"></div>
+          <div class="form-group"><label>Street Address</label><input [(ngModel)]="newAddress.street"></div>
+          <div class="form-group"><label>City / Barangay</label><input [(ngModel)]="newAddress.city"></div>
+          <div class="form-group">
+            <label>Delivery Zone</label>
+            <select [(ngModel)]="newAddress.zoneId">
+              @for (z of zones; track z.id) { <option [value]="z.id">{{ z.name }} (₱{{ z.fee }})</option> }
+            </select>
+          </div>
+          <button class="btn btn--primary" (click)="saveNewAddress()">Save Address</button>
+        </div>
+      }
+    </div>
+    <button class="btn btn--primary" style="margin-top:1rem" [disabled]="!addressId" (click)="step.set(2)">Continue to Delivery</button>
+  }
+
+  @if (step() === 2) {
+    <div class="card">
+      <h2>Delivery Schedule</h2>
+      <p class="muted">Delivery date: <strong>{{ deliveryDate }}</strong></p>
+      <div class="form-group">
+        <label>Delivery Zone</label>
+        <select [(ngModel)]="zoneId">
+          @for (z of zones; track z.id) { <option [value]="z.id">{{ z.name }} (₱{{ z.fee }})</option> }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Time Slot</label>
+        @for (s of slots; track s.id) {
+          <label class="option">
+            <input type="radio" name="slot" [value]="s.id" [(ngModel)]="slotId"> {{ s.label }}
+          </label>
+        }
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn--outline" (click)="step.set(1)">Back</button>
+      <button class="btn btn--primary" (click)="step.set(3)">Continue to Payment</button>
+    </div>
+  }
+
+  @if (step() === 3) {
+    <div class="card">
+      <h2>Payment Method</h2>
+      @for (m of paymentMethods; track m.id) {
+        <label class="option">
+          <input type="radio" name="payment" [value]="m.id" [(ngModel)]="paymentMethod"> {{ m.icon }} {{ m.name }}
+        </label>
+      }
+      @if (paymentMethod === 'card') {
+        <div class="card-fields">
+          <div class="form-group"><label>Card Number</label><input [(ngModel)]="cardNumber"></div>
+          <div class="row">
+            <div class="form-group"><label>Exp Month</label><input [(ngModel)]="cardExpMonth"></div>
+            <div class="form-group"><label>Exp Year</label><input [(ngModel)]="cardExpYear"></div>
+            <div class="form-group"><label>CVC</label><input [(ngModel)]="cardCvc"></div>
+          </div>
+          <p class="muted" style="font-size:0.8rem">Sandbox test card: 4571 7360 0000 0008</p>
+        </div>
+      }
+    </div>
+    <div class="btn-row">
+      <button class="btn btn--outline" (click)="step.set(2)">Back</button>
+      <button class="btn btn--primary" (click)="step.set(4)">Review Order</button>
+    </div>
+  }
+
+  @if (step() === 4) {
+    <div class="card">
+      <h2>Review Your Order</h2>
+      @for (item of cart.cartItems(); track item.productId + item.variantId) {
+        <div class="summary-row"><span>{{ item.quantity }}x {{ item.product.name }}</span><span>₱{{ (item.variant.price * item.quantity).toFixed(2) }}</span></div>
+      }
+      <hr>
+      <div class="summary-row"><span>Subtotal</span><span>₱{{ cart.subtotal().toFixed(2) }}</span></div>
+      <div class="summary-row"><span>Delivery</span><span>{{ deliveryFee === 0 ? 'FREE' : '₱' + deliveryFee.toFixed(2) }}</span></div>
+      <div class="summary-row total"><span>Total</span><span>₱{{ estimatedTotal.toFixed(2) }}</span></div>
+      <p class="muted" style="font-size:0.8rem">Final total is confirmed by the server and may differ slightly if prices or stock changed.</p>
+      @if (error()) { <p class="form-error">{{ error() }}</p> }
+    </div>
+    <div class="btn-row">
+      <button class="btn btn--outline" (click)="step.set(3)">Back</button>
+      <button class="btn btn--primary" [disabled]="placing()" (click)="placeOrder()">
+        {{ placing() ? 'Placing Order…' : 'Place Order' }}
+      </button>
+    </div>
+  }
+</div>

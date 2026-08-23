@@ -1,0 +1,4 @@
+.faq { margin-bottom: 0.5rem; }
+.faq summary { font-weight: 600; cursor: pointer; }
+.faq p { margin-top: 0.5rem; }
+.success { background: #d4edda; color: #155724; }

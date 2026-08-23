@@ -1,0 +1,12 @@
+<nav class="bottom-nav">
+  <a routerLink="/home" routerLinkActive="active"><span>🏠</span>Home</a>
+  <a routerLink="/shop" routerLinkActive="active"><span>🛍️</span>Shop</a>
+  <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+    <span>🛒</span>Cart
+    @if (cart.itemCount() > 0) {
+      <span class="badge">{{ cart.itemCount() }}</span>
+    }
+  </a>
+  <a routerLink="/orders" routerLinkActive="active"><span>📦</span>Orders</a>
+  <a routerLink="/profile" routerLinkActive="active"><span>👤</span>Profile</a>
+</nav>

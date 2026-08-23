@@ -1,0 +1,26 @@
+<div class="page">
+  <header class="hero">
+    <h1>🛒 Go! Cery</h1>
+    <p>Palengke-Fresh, Delivered Tomorrow</p>
+  </header>
+
+  <a routerLink="/shop" class="btn btn--primary" style="margin-bottom:1.5rem">Shop All Products</a>
+
+  <h2>Suki Picks</h2>
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else {
+    <div class="grid">
+      @for (p of featured(); track p.id) {
+        <div class="card product-card">
+          <a [routerLink]="['/product', p.id]" class="product-card__image">
+            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }
+          </a>
+          <a [routerLink]="['/product', p.id]"><strong>{{ p.name }}</strong></a>
+          <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
+          <button class="btn btn--outline" (click)="addToCart(p)">Add to Cart</button>
+        </div>
+      }
+    </div>
+  }
+</div>

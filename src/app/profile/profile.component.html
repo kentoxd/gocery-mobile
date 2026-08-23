@@ -1,0 +1,36 @@
+<div class="page" *ngIf="auth.currentUser() as user">
+  <h1>My Profile</h1>
+
+  <div class="card">
+    @if (!editing()) {
+      <p><strong>Name:</strong> {{ user.name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone:</strong> {{ user.phone || '—' }}</p>
+      <button class="btn btn--outline" style="margin-top:0.75rem" (click)="editing.set(true)">Edit Profile</button>
+    } @else {
+      <div class="form-group"><label>Name</label><input [(ngModel)]="name"></div>
+      <div class="form-group"><label>Phone</label><input [(ngModel)]="phone"></div>
+      <button class="btn btn--primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+    }
+  </div>
+
+  <h2>Delivery Addresses</h2>
+  @if (!user.addresses?.length) {
+    <p class="muted">No saved addresses yet — add one during checkout.</p>
+  } @else {
+    @for (a of user.addresses; track a.id) {
+      <div class="card address-card">
+        <strong>{{ a.label || 'Home' }}</strong>
+        <p class="muted">{{ a.street }}, {{ a.city }}</p>
+      </div>
+    }
+  }
+
+  <nav class="links">
+    <a routerLink="/wishlist">🤍 My Wishlist</a>
+    <a routerLink="/notifications">🔔 Notifications</a>
+    <a routerLink="/support">💬 Support</a>
+  </nav>
+
+  <button class="btn btn--outline" style="margin-top:1rem;color:#c0392b" (click)="logout()">Log Out</button>
+</div>

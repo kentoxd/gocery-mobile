@@ -1,0 +1,19 @@
+<div class="page">
+  <h1>Notifications</h1>
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (!notifications().length) {
+    <p class="muted">No notifications yet. You'll see updates here when your order status changes.</p>
+  } @else {
+    @for (n of notifications(); track n.orderId + n.timestamp) {
+      <a [routerLink]="['/orders', n.orderId]" class="card notif" [class.new]="isNew(n)">
+        <div class="notif__header">
+          <span>Order {{ n.orderId.slice(0, 8) }} is now <strong>{{ n.status }}</strong></span>
+          @if (isNew(n)) { <span class="dot">●</span> }
+        </div>
+        @if (n.note) { <p class="muted">{{ n.note }}</p> }
+        <small class="muted">{{ n.timestamp | date:'medium' }}</small>
+      </a>
+    }
+  }
+</div>

@@ -1,0 +1,4 @@
+.notif { display: block; margin-bottom: 0.6rem; }
+.notif.new { border-left: 3px solid var(--color-primary); }
+.notif__header { display: flex; justify-content: space-between; align-items: center; }
+.dot { color: var(--color-primary); font-size: 0.8rem; }

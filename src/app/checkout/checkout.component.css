@@ -1,0 +1,13 @@
+.steps { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.75rem; color: var(--color-text-muted); }
+.steps .active { color: var(--color-primary); font-weight: 700; }
+.option { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0; border-bottom: 1px solid var(--color-border); }
+.option:last-child { border-bottom: none; }
+.new-address { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+.btn-row .btn { flex: 1; }
+.card-fields { margin-top: 0.75rem; }
+.row { display: flex; gap: 0.5rem; }
+.row .form-group { flex: 1; }
+.summary-row { display: flex; justify-content: space-between; padding: 0.3rem 0; }
+.summary-row.total { font-weight: 700; font-size: 1.1rem; color: var(--color-primary); }
+hr { margin: 0.75rem 0; border: none; border-top: 1px solid var(--color-border); }

@@ -1,0 +1,38 @@
+<div class="page">
+  <h1>Shop</h1>
+
+  <div class="filters">
+    <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
+    <div class="filter-row">
+      <select [(ngModel)]="categoryId" (ngModelChange)="applyFilters()">
+        <option value="">All Categories</option>
+        @for (c of categories; track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+      </select>
+      <select [(ngModel)]="sort" (ngModelChange)="applyFilters()">
+        <option value="">Sort</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="name">Name A-Z</option>
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (!results().length) {
+    <p class="muted">No products match your search.</p>
+  } @else {
+    <div class="grid">
+      @for (p of results(); track p.id) {
+        <div class="card product-card">
+          <a [routerLink]="['/product', p.id]" class="product-card__image">
+            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }
+          </a>
+          <a [routerLink]="['/product', p.id]"><strong>{{ p.name }}</strong></a>
+          <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
+          <button class="btn btn--outline" (click)="addToCart(p)">Add to Cart</button>
+        </div>
+      }
+    </div>
+  }
+</div>

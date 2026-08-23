@@ -1,0 +1,10 @@
+.empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-muted); }
+.wishlist-item { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+.wishlist-item__image {
+  width: 64px; height: 64px; flex-shrink: 0; background: linear-gradient(135deg,#f0fdf4,#ecfdf5);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+}
+.wishlist-item__image img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.wishlist-item__info { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
+.actions { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+.actions .btn { width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem; }

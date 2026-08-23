@@ -1,0 +1,5 @@
+.order-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.status { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 999px; background: #eee; white-space: nowrap; }
+.status--Confirmed, .status--Delivered { background: #d4edda; color: #155724; }
+.status--Cancelled { background: #f8d7da; color: #721c24; }
+.status--Pending { background: #fff3cd; color: #856404; }

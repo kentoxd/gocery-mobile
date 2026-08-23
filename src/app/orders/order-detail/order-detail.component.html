@@ -1,0 +1,35 @@
+<div class="page" *ngIf="order() as o">
+  <h1>Order {{ o.id.slice(0, 8) }}</h1>
+
+  @if (o.status !== 'Cancelled' && o.status !== 'Refunded') {
+    <div class="tracker">
+      @for (s of statusSteps; track s; let i = $index) {
+        <div class="step" [class.done]="i <= currentStepIndex">
+          <div class="dot"></div>
+          <span>{{ s }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="status-banner">{{ o.status }}</p>
+  }
+
+  <div class="card">
+    <h2>Items</h2>
+    @for (item of o.items; track item.productId) {
+      <div class="summary-row"><span>{{ item.quantity }}x {{ item.name }} ({{ item.unit }})</span><span>₱{{ item.lineTotal.toFixed(2) }}</span></div>
+    }
+    <hr>
+    <div class="summary-row"><span>Subtotal</span><span>₱{{ o.subtotal.toFixed(2) }}</span></div>
+    @if (o.discount) { <div class="summary-row"><span>Discount</span><span>-₱{{ o.discount.toFixed(2) }}</span></div> }
+    <div class="summary-row"><span>Delivery</span><span>₱{{ o.deliveryFee.toFixed(2) }}</span></div>
+    <div class="summary-row total"><span>Total</span><span>₱{{ o.total.toFixed(2) }}</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Delivery Details</h2>
+    <p><strong>Address:</strong> {{ o.address?.street }}, {{ o.address?.city }}</p>
+    <p><strong>Date & Slot:</strong> {{ o.deliveryDate }} · {{ o.deliverySlot }}</p>
+    <p><strong>Payment:</strong> {{ o.paymentMethod }} ({{ o.paymentStatus }})</p>
+  </div>
+</div>

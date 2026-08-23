@@ -1,0 +1,17 @@
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; background: #fff; border-top: 1px solid var(--color-border);
+  padding-bottom: var(--safe-bottom); z-index: 50;
+}
+.bottom-nav a {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 0.6rem 0; font-size: 0.7rem; color: #888; position: relative;
+}
+.bottom-nav a span:first-child { font-size: 1.3rem; }
+.bottom-nav a.active { color: var(--color-primary); font-weight: 600; }
+.cart-link .badge {
+  position: absolute; top: 2px; right: calc(50% - 20px);
+  background: var(--color-accent); color: #fff; font-size: 0.65rem;
+  border-radius: 999px; min-width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
