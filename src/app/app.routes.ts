@@ -14,6 +14,9 @@ export const routes: Routes = [
   { path: 'wishlist', canActivate: [authGuard], loadComponent: () => import('./wishlist/wishlist.component').then(m => m.WishlistComponent) },
   { path: 'notifications', canActivate: [authGuard], loadComponent: () => import('./notifications/notifications.component').then(m => m.NotificationsComponent) },
   { path: 'support', loadComponent: () => import('./support/support.component').then(m => m.SupportComponent) },
+  { path: 'about', loadComponent: () => import('./about/about.component').then(m => m.AboutComponent) },
+  { path: 'blog', loadComponent: () => import('./blog/blog.component').then(m => m.BlogComponent) },
+  { path: 'reviews', loadComponent: () => import('./reviews/reviews.component').then(m => m.ReviewsComponent) },
   { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
   { path: '**', redirectTo: 'home' }

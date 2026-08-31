@@ -1,18 +1,27 @@
 <div class="page">
-  <h1>Notifications</h1>
+  <div class="page-header">
+    <h1>Notifications</h1>
+  </div>
+
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (!notifications().length) {
-    <p class="muted">No notifications yet. You'll see updates here when your order status changes.</p>
+    <div class="empty-state">
+      <span class="empty-state__icon">🔔</span>
+      <p>No notifications yet. You'll see updates here when your order status changes.</p>
+    </div>
   } @else {
     @for (n of notifications(); track n.orderId + n.timestamp) {
-      <a [routerLink]="['/orders', n.orderId]" class="card notif" [class.new]="isNew(n)">
-        <div class="notif__header">
-          <span>Order {{ n.orderId.slice(0, 8) }} is now <strong>{{ n.status }}</strong></span>
-          @if (isNew(n)) { <span class="dot">●</span> }
+      <a [routerLink]="['/orders', n.orderId]" class="card list-row notif" [class.new]="isNew(n)">
+        <div class="list-row__icon">🔔</div>
+        <div class="list-row__body">
+          <div class="notif__header">
+            <span>Order {{ n.orderId.slice(0, 8) }} is now <strong>{{ n.status }}</strong></span>
+            @if (isNew(n)) { <span class="badge">New</span> }
+          </div>
+          @if (n.note) { <p class="muted">{{ n.note }}</p> }
+          <small class="muted">{{ n.timestamp | date:'medium' }}</small>
         </div>
-        @if (n.note) { <p class="muted">{{ n.note }}</p> }
-        <small class="muted">{{ n.timestamp | date:'medium' }}</small>
       </a>
     }
   }

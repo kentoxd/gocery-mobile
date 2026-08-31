@@ -1,0 +1,17 @@
+<div class="page">
+  <div class="page-header">
+    <h1>About Us</h1>
+  </div>
+
+  <div class="card about-card">
+    <p class="about-lede">Your one-stop online <em>palengke</em> — reimagined for busy Filipino households.</p>
+    <p class="muted">{{ aboutText() }}</p>
+  </div>
+
+  <div class="card about-card">
+    <p class="muted">Browse through nine carefully arranged categories. Whether you're planning for a week's worth of meals or you just need something for tonight's dinner, Go! Cery already has it, so you can cook delicious, healthy and well-balanced meals for you and your family.</p>
+    <div class="about-categories">
+      @for (c of categories; track c) { <span>{{ c }}</span> }
+    </div>
+  </div>
+</div>

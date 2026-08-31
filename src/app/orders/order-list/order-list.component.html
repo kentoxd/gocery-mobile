@@ -1,17 +1,28 @@
 <div class="page">
-  <h1>My Orders</h1>
+  <div class="page-header">
+    <h1>My Orders</h1>
+  </div>
+
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (!orders().length) {
-    <p class="muted">No orders yet.</p>
+    <div class="empty-state">
+      <span class="empty-state__icon">📦</span>
+      <p>No orders yet.</p>
+    </div>
   } @else {
     @for (o of orders(); track o.id) {
-      <a [routerLink]="['/orders', o.id]" class="card order-row">
-        <div>
+      <a [routerLink]="['/orders', o.id]" class="card list-row">
+        <div class="list-row__icon">📦</div>
+        <div class="list-row__body">
           <strong>Order {{ o.id.slice(0, 8) }}</strong>
           <p class="muted">{{ o.items.length }} item(s) — ₱{{ o.total.toFixed(2) }}</p>
         </div>
-        <span class="status status--{{ o.status.replace(' ', '-') }}">{{ o.status }}</span>
+        <span class="status-pill" [ngClass]="{
+          'status-pill--positive': o.status === 'Confirmed' || o.status === 'Delivered',
+          'status-pill--negative': o.status === 'Cancelled',
+          'status-pill--pending': o.status === 'Pending'
+        }">{{ o.status }}</span>
       </a>
     }
   }

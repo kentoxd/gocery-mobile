@@ -1,8 +1,11 @@
 <div class="page">
-  <h1>Your Cart</h1>
+  <div class="page-header">
+    <h1>Your Cart</h1>
+  </div>
 
   @if (!cart.cartItems().length) {
-    <div class="empty">
+    <div class="empty-state">
+      <span class="empty-state__icon">🛒</span>
       <p>Your cart is empty.</p>
       <a routerLink="/shop" class="btn btn--primary">Start Shopping</a>
     </div>
@@ -10,23 +13,25 @@
     @for (item of cart.cartItems(); track item.productId + item.variantId) {
       <div class="card cart-item">
         <div class="cart-item__image">
-          @if (item.product.imageUrl) { <img [src]="item.product.imageUrl" [alt]="item.product.name"> } @else { <span>{{ item.product.image }}</span> }
+          @if (item.product.imageUrl) { <img [src]="item.product.imageUrl" [alt]="item.product.name" loading="lazy"> } @else { <span>{{ item.product.image }}</span> }
         </div>
         <div class="cart-item__info">
           <strong>{{ item.product.name }}</strong>
           <span class="muted">{{ item.variant.unit }} — ₱{{ item.variant.price.toFixed(2) }}</span>
-          <div class="stepper">
-            <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity - 1)">−</button>
-            <span>{{ item.quantity }}</span>
-            <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity + 1)">+</button>
-            <button class="remove" (click)="cart.remove(item.productId, item.variantId)">Remove</button>
+          <div class="cart-item__row">
+            <div class="stepper">
+              <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity - 1)" aria-label="Decrease quantity">−</button>
+              <span>{{ item.quantity }}</span>
+              <button (click)="cart.updateQuantity(item.productId, item.variantId, item.quantity + 1)" aria-label="Increase quantity">+</button>
+            </div>
+            <button class="remove-btn" (click)="cart.remove(item.productId, item.variantId)">Remove</button>
           </div>
         </div>
       </div>
     }
 
     <div class="summary card">
-      <div class="row"><span>Subtotal</span><strong>₱{{ cart.subtotal().toFixed(2) }}</strong></div>
+      <div class="row"><span>Subtotal</span><strong class="price">₱{{ cart.subtotal().toFixed(2) }}</strong></div>
       <p class="muted" style="font-size:0.8rem">Delivery fee and any discounts are calculated at checkout.</p>
     </div>
 

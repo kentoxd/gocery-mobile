@@ -1,12 +1,14 @@
 <div class="page">
-  <h1>Shop</h1>
+  <div class="page-header">
+    <h1>Shop</h1>
+  </div>
 
   <div class="filters">
-    <input [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
+    <input class="input-pill" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
     <div class="filter-row">
       <select [(ngModel)]="categoryId" (ngModelChange)="applyFilters()">
         <option value="">All Categories</option>
-        @for (c of categories; track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+        @for (c of categories; track c.id) { <option [value]="c.id">{{ c.icon }} {{ c.name }}</option> }
       </select>
       <select [(ngModel)]="sort" (ngModelChange)="applyFilters()">
         <option value="">Sort</option>
@@ -20,17 +22,21 @@
   @if (loading()) {
     <p class="muted">Loading…</p>
   } @else if (!results().length) {
-    <p class="muted">No products match your search.</p>
+    <div class="empty-state">
+      <span class="empty-state__icon">🔍</span>
+      <p>No products match your search.</p>
+    </div>
   } @else {
     <div class="grid">
       @for (p of results(); track p.id) {
         <div class="card product-card">
           <a [routerLink]="['/product', p.id]" class="product-card__image">
-            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }
+            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
           </a>
-          <a [routerLink]="['/product', p.id]"><strong>{{ p.name }}</strong></a>
+          <a [routerLink]="['/product', p.id]" class="product-card__name"><strong>{{ p.name }}</strong></a>
+          <span class="product-card__unit">per {{ p.variants[0].unit }}</span>
           <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
-          <button class="btn btn--outline" (click)="addToCart(p)">Add to Cart</button>
+          <button class="btn btn--primary" (click)="addToCart(p)">Add to Cart</button>
         </div>
       }
     </div>

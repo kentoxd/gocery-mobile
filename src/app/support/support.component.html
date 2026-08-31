@@ -1,15 +1,36 @@
 <div class="page">
-  <h1>Help & Support</h1>
+  <div class="page-header">
+    <h1>Help & Support</h1>
+  </div>
 
-  <h2>FAQs</h2>
-  @for (f of faqs; track f.q) {
+  <h2 class="section-title">Get in Touch</h2>
+  <div class="contact-grid">
+    @for (c of contactCards; track c.title) {
+      <div class="card contact-card">
+        <div class="contact-card__icon">{{ c.icon }}</div>
+        <strong>{{ c.title }}</strong>
+        @for (line of c.lines; track line) {
+          @if (c.mapUrl) {
+            <a class="muted" [href]="c.mapUrl" target="_blank" rel="noopener">{{ line }}</a>
+          } @else if (c.mailto) {
+            <a class="muted" [href]="c.mailto">{{ line }}</a>
+          } @else {
+            <p class="muted">{{ line }}</p>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <h2 class="section-title" style="margin-top:1.5rem">FAQs</h2>
+  @for (f of faqs(); track f.q) {
     <details class="card faq">
       <summary>{{ f.q }}</summary>
       <p class="muted">{{ f.a }}</p>
     </details>
   }
 
-  <h2 style="margin-top:1.5rem">Contact Us</h2>
+  <h2 class="section-title" style="margin-top:1.5rem">Contact Us</h2>
   @if (submitted()) {
     <div class="card success">Thanks! We've received your message and will get back to you soon.</div>
   } @else {

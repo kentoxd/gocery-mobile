@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../core/order.service';
 
@@ -16,7 +16,11 @@ export class OrderDetailComponent implements OnInit {
   order = signal<any>(null);
   statusSteps = STATUS_STEPS;
 
-  constructor(private route: ActivatedRoute, private router: Router, private orderService: OrderService) {}
+  constructor(private route: ActivatedRoute, private router: Router, private orderService: OrderService, private location: Location) {}
+
+  goBack() {
+    this.location.back();
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;

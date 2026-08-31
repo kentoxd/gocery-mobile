@@ -1,5 +1,8 @@
 <div class="page" *ngIf="order() as o">
-  <h1>Order {{ o.id.slice(0, 8) }}</h1>
+  <div class="page-header">
+    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
+    <h1>Order {{ o.id.slice(0, 8) }}</h1>
+  </div>
 
   @if (o.status !== 'Cancelled' && o.status !== 'Refunded') {
     <div class="tracker">
@@ -11,11 +14,11 @@
       }
     </div>
   } @else {
-    <p class="status-banner">{{ o.status }}</p>
+    <p class="status-pill status-pill--negative status-banner">{{ o.status }}</p>
   }
 
   <div class="card">
-    <h2>Items</h2>
+    <h2 class="section-title">Items</h2>
     @for (item of o.items; track item.productId) {
       <div class="summary-row"><span>{{ item.quantity }}x {{ item.name }} ({{ item.unit }})</span><span>₱{{ item.lineTotal.toFixed(2) }}</span></div>
     }
@@ -27,9 +30,9 @@
   </div>
 
   <div class="card">
-    <h2>Delivery Details</h2>
+    <h2 class="section-title">Delivery Details</h2>
     <p><strong>Address:</strong> {{ o.address?.street }}, {{ o.address?.city }}</p>
-    <p><strong>Date & Slot:</strong> {{ o.deliveryDate }} · {{ o.deliverySlot }}</p>
+    <p><strong>Date &amp; Slot:</strong> {{ o.deliveryDate }} · {{ o.deliverySlot }}</p>
     <p><strong>Payment:</strong> {{ o.paymentMethod }} ({{ o.paymentStatus }})</p>
   </div>
 </div>

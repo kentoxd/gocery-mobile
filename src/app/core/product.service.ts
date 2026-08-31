@@ -1,6 +1,18 @@
 import { Injectable } from '@angular/core';
 import { collection, doc, getDoc, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import { optimizeImageUrl } from './image-url.util';
+
+export interface Category { id: string; name: string; icon: string; }
+
+export const CATEGORIES: Category[] = [
+  { id: 'fruits', name: 'Fruits', icon: '🍎' },
+  { id: 'vegetables', name: 'Vegetables', icon: '🥬' },
+  { id: 'herbs-spices', name: 'Herbs & Spices', icon: '🌿' },
+  { id: 'seafood', name: 'Fresh Seafood', icon: '🐟' },
+  { id: 'meat', name: 'Fresh Meat', icon: '🥩' },
+  { id: 'eggs-dairy', name: 'Eggs & Dairy', icon: '🥚' }
+];
 
 export interface Variant { id: string; unit: string; price: number; stock: number; }
 export interface Product {
@@ -22,12 +34,16 @@ export class ProductService {
 
   async getAll(): Promise<Product[]> {
     const snap = await getDocs(collection(this.fb.db, 'products'));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Product));
+    return snap.docs.map(d => this._withOptimizedImage({ id: d.id, ...d.data() } as Product));
   }
 
   async getById(id: string): Promise<Product | null> {
     const d = await getDoc(doc(this.fb.db, 'products', id));
-    return d.exists() ? ({ id: d.id, ...d.data() } as Product) : null;
+    return d.exists() ? this._withOptimizedImage({ id: d.id, ...d.data() } as Product) : null;
+  }
+
+  private _withOptimizedImage(p: Product): Product {
+    return p.imageUrl ? { ...p, imageUrl: optimizeImageUrl(p.imageUrl) } : p;
   }
 
   async getReviews(productId: string) {

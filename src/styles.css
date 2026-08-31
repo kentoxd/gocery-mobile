@@ -1,17 +1,28 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --color-primary: #2f6d4f;
-  --color-primary-dark: #234f39;
-  --color-accent: #e2a03f;
+  /* Design tokens mirrored from the web app (css/main.css) so both
+     clients share one visual identity. */
+  --color-primary: #2d6a4f;
+  --color-primary-dark: #1b4332;
+  --color-primary-light: #40916c;
+  --color-accent: #e85d04;
+  --color-accent-light: #f48c06;
   --color-bg: #faf9f6;
-  --color-border: #e5e5e0;
-  --color-text-muted: #6b6b63;
-  --radius: 10px;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text-muted: #6b7280;
+  --color-error: #dc2626;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius: var(--radius-md);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.1);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 html, body {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   background: var(--color-bg);
   color: #222;
   -webkit-tap-highlight-color: transparent;
@@ -23,20 +34,106 @@ a { color: inherit; text-decoration: none; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0.75rem 1rem; border-radius: var(--radius); border: none;
-  font-weight: 600; width: 100%;
+  font-weight: 600; width: 100%; transition: background-color 0.2s ease, color 0.2s ease;
 }
 .btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:active { background: var(--color-primary-dark); }
+.btn--accent { background: var(--color-accent); color: #fff; }
+.btn--accent:active { background: #c44900; }
 .btn--outline { background: #fff; border: 1px solid var(--color-border); color: #222; }
 .btn:disabled { opacity: 0.5; }
 
 .card {
-  background: #fff; border-radius: var(--radius); padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  background: var(--color-surface); border-radius: var(--radius); padding: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.85rem; }
 .form-group input, .form-group select, .form-group textarea {
   padding: 0.7rem 0.85rem; border: 1px solid var(--color-border); border-radius: 8px;
 }
-.form-error { color: #c0392b; font-size: 0.85rem; }
+.form-error { color: var(--color-error); font-size: 0.85rem; }
 
 .page { padding: 1rem; padding-bottom: calc(72px + var(--safe-bottom)); }
+
+/* ---------- Shared design system ---------- */
+
+/* Page header: back button + title, used on every drill-down screen */
+.page-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+.page-header h1 { font-size: 1.25rem; color: var(--color-primary-dark); }
+.page-header__back {
+  flex-shrink: 0; background: #fff; border: 1px solid var(--color-border);
+  border-radius: 999px; width: 36px; height: 36px; font-size: 1rem; color: var(--color-primary-dark);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Section title, matches Home's "Best Sellers" / "Categories" labels */
+.section-title {
+  font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--color-primary-dark); margin-bottom: 0.85rem;
+}
+
+/* Pill button modifier */
+.btn--pill { border-radius: 999px; width: auto; padding: 0.6rem 1.25rem; }
+.btn--sm { padding: 0.5rem 0.9rem; font-size: 0.85rem; }
+.btn--danger { background: #fff; border: 1px solid #f3c3c3; color: #c0392b; }
+.btn-row { display: flex; gap: 0.75rem; }
+.btn-row .btn { flex: 1; }
+
+/* Shared quantity stepper */
+.stepper {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  border: 1px solid var(--color-border); border-radius: 999px; padding: 0.3rem 0.7rem; background: #fff;
+}
+.stepper button {
+  background: none; border: none; font-size: 1rem; font-weight: 700;
+  color: var(--color-primary-dark); width: 20px; line-height: 1;
+}
+.stepper span { font-weight: 600; min-width: 1.2ch; text-align: center; }
+
+/* Notification / cart count badge */
+.badge {
+  background: var(--color-accent); color: #fff; font-size: 0.65rem; font-weight: 700;
+  border-radius: 999px; min-width: 18px; height: 18px; padding: 0 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Empty state block */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--color-text-muted); }
+.empty-state__icon { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+.empty-state .btn { max-width: 220px; margin: 1rem auto 0; }
+
+/* Status pill, e.g. order status */
+.status-pill { font-size: 0.72rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: #eee; white-space: nowrap; font-weight: 700; }
+.status-pill--positive { background: #d4edda; color: #155724; }
+.status-pill--negative { background: #f8d7da; color: #721c24; }
+.status-pill--pending { background: #fff3cd; color: #856404; }
+
+/* Simple list row link (orders, addresses, quick links) */
+.list-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.list-row__icon {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px;
+  background: linear-gradient(135deg,#f0fdf4,#ecfdf5); display: flex; align-items: center;
+  justify-content: center; font-size: 1.2rem;
+}
+.list-row__body { flex: 1; min-width: 0; }
+.list-row__chevron { color: var(--color-text-muted); font-size: 1.2rem; }
+
+/* Rounded search-style input, reused outside Home (e.g. shop filters) */
+.input-pill {
+  padding: 0.7rem 0.9rem; border: 1px solid var(--color-border);
+  border-radius: 999px; font-size: 0.9rem; width: 100%;
+}
+
+/* Product grid card, shared by Home rail, Shop grid, Wishlist */
+.product-card { display: flex; flex-direction: column; gap: 0.4rem; }
+.product-card__image {
+  height: 100px; background: linear-gradient(135deg,#f0fdf4,#ecfdf5);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+}
+.product-card__image img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.product-card__name { font-size: 0.85rem; }
+.product-card__unit { font-size: 0.7rem; color: var(--color-text-muted); }
+.price { font-weight: 700; color: var(--color-primary); }

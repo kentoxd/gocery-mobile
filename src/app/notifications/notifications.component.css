@@ -1,4 +1,4 @@
-.notif { display: block; margin-bottom: 0.6rem; }
+.notif { align-items: flex-start; }
 .notif.new { border-left: 3px solid var(--color-primary); }
-.notif__header { display: flex; justify-content: space-between; align-items: center; }
-.dot { color: var(--color-primary); font-size: 0.8rem; }
+.notif__header { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.notif__header .badge { padding: 0 6px; }

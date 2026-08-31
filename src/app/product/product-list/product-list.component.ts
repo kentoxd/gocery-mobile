@@ -1,17 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ProductService, Product } from '../../core/product.service';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ProductService, Product, CATEGORIES } from '../../core/product.service';
 import { CartService } from '../../core/cart.service';
-
-const CATEGORIES = [
-  { id: 'fruits', name: 'Fruits' },
-  { id: 'vegetables', name: 'Vegetables' },
-  { id: 'herbs-spices', name: 'Herbs & Spices' },
-  { id: 'seafood', name: 'Fresh Seafood' },
-  { id: 'meat', name: 'Fresh Meat' },
-  { id: 'eggs-dairy', name: 'Eggs & Dairy' }
-];
 
 @Component({
   selector: 'app-product-list',
@@ -30,9 +21,13 @@ export class ProductListComponent implements OnInit {
   categoryId = '';
   sort = '';
 
-  constructor(private products: ProductService, public cart: CartService) {}
+  constructor(private products: ProductService, public cart: CartService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
+    const params = this.route.snapshot.queryParamMap;
+    this.categoryId = params.get('category') || '';
+    this.search = params.get('search') || '';
+
     this.all = await this.products.getAll();
     this.applyFilters();
     this.loading.set(false);

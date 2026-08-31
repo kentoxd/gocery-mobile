@@ -1,18 +1,22 @@
 <div class="page" *ngIf="product() as p">
+  <div class="page-header">
+    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
+    <h1>{{ p.name }}</h1>
+  </div>
+
   <div class="detail-image">
     @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }
     <button class="wishlist-btn" (click)="toggleWishlist()">{{ isWishlisted() ? '❤️' : '🤍' }}</button>
   </div>
 
-  <h1>{{ p.name }}</h1>
   @if (p.origin) { <p class="muted">Origin: {{ p.origin }}</p> }
   @if (reviews().length) {
     <p class="rating">⭐ {{ averageRating.toFixed(1) }} ({{ reviews().length }} reviews)</p>
   }
-  <p>{{ p.description }}</p>
+  <p class="description">{{ p.description }}</p>
 
   <div class="variant-select">
-    <label>Unit</label>
+    <label class="field-label">Unit</label>
     <select [(ngModel)]="selectedVariantId">
       @for (v of p.variants; track v.id) {
         <option [value]="v.id">{{ v.unit }} — ₱{{ v.price.toFixed(2) }} ({{ v.stock }} available)</option>
@@ -21,11 +25,11 @@
   </div>
 
   <div class="qty-row">
-    <label>Quantity</label>
+    <label class="field-label">Quantity</label>
     <div class="stepper">
-      <button (click)="quantity = quantity > 1 ? quantity - 1 : 1">−</button>
+      <button (click)="quantity = quantity > 1 ? quantity - 1 : 1" aria-label="Decrease quantity">−</button>
       <span>{{ quantity }}</span>
-      <button (click)="quantity = quantity + 1">+</button>
+      <button (click)="quantity = quantity + 1" aria-label="Increase quantity">+</button>
     </div>
   </div>
 
@@ -33,7 +37,7 @@
 
   <hr>
 
-  <h2>Customer Reviews</h2>
+  <h2 class="section-title">Customer Reviews</h2>
   @if (!reviews().length) {
     <p class="muted">No reviews yet. Be the first!</p>
   } @else {
@@ -46,29 +50,41 @@
     }
   }
 
-  <h3 style="margin-top:1.5rem">Leave a Review</h3>
-  @if (auth.currentUser()) {
-    <div class="card">
-      <div class="form-group">
-        <label>Rating</label>
-        <select [(ngModel)]="reviewRating">
-          <option [ngValue]="5">⭐⭐⭐⭐⭐ Excellent</option>
-          <option [ngValue]="4">⭐⭐⭐⭐ Good</option>
-          <option [ngValue]="3">⭐⭐⭐ Okay</option>
-          <option [ngValue]="2">⭐⭐ Poor</option>
-          <option [ngValue]="1">⭐ Bad</option>
-        </select>
+  <h2 class="section-title" style="margin-top:1.5rem">Leave a Review</h2>
+  @switch (reviewGateStatus()) {
+    @case ('logged-out') {
+      <p class="review-gate">Please <a routerLink="/login">log in</a> to write a review.</p>
+    }
+    @case ('checking') {
+      <p class="muted">Checking your order history…</p>
+    }
+    @case ('already-reviewed') {
+      <p class="review-gate">You've already reviewed this product. Thanks for sharing your feedback!</p>
+    }
+    @case ('not-eligible') {
+      <p class="review-gate">You can review this product once it's marked <strong>Delivered</strong> on one of your orders.</p>
+    }
+    @case ('eligible') {
+      <div class="card">
+        <div class="form-group">
+          <label>Rating</label>
+          <select [(ngModel)]="reviewRating">
+            <option [ngValue]="5">⭐⭐⭐⭐⭐ Excellent</option>
+            <option [ngValue]="4">⭐⭐⭐⭐ Good</option>
+            <option [ngValue]="3">⭐⭐⭐ Okay</option>
+            <option [ngValue]="2">⭐⭐ Poor</option>
+            <option [ngValue]="1">⭐ Bad</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Comment</label>
+          <textarea [(ngModel)]="reviewComment" rows="3" placeholder="How was this product?"></textarea>
+        </div>
+        @if (reviewError()) { <p class="form-error">{{ reviewError() }}</p> }
+        <button class="btn btn--primary" (click)="submitReview()" [disabled]="reviewSubmitting()">
+          {{ reviewSubmitting() ? 'Submitting…' : 'Submit Review' }}
+        </button>
       </div>
-      <div class="form-group">
-        <label>Comment</label>
-        <textarea [(ngModel)]="reviewComment" rows="3" placeholder="How was this product?"></textarea>
-      </div>
-      @if (reviewError()) { <p class="form-error">{{ reviewError() }}</p> }
-      <button class="btn btn--primary" (click)="submitReview()" [disabled]="reviewSubmitting()">
-        {{ reviewSubmitting() ? 'Submitting…' : 'Submit Review' }}
-      </button>
-    </div>
-  } @else {
-    <p class="muted">Please log in to leave a review.</p>
+    }
   }
 </div>

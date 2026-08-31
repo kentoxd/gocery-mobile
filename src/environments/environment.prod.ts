@@ -8,5 +8,10 @@ export const environment = {
     storageBucket: 'go--cery.firebasestorage.app',
     messagingSenderId: 'PASTE_FROM_js/config.firebase.js',
     appId: 'PASTE_FROM_js/config.firebase.js'
+  },
+  emailjs: {
+    serviceId: 'PASTE_FROM_js/config.emailjs.js',
+    templateId: 'PASTE_FROM_js/config.emailjs.js',
+    publicKey: 'PASTE_FROM_js/config.emailjs.js'
   }
 };

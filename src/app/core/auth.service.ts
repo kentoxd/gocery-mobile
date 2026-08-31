@@ -21,21 +21,47 @@ export class AuthService {
   readonly currentUser = signal<AppUser | null>(null);
   readonly authReady = signal(false);
 
+  /**
+   * Resolves as soon as Firebase reports whether a user is logged in —
+   * this is a local/cached check, not a network round trip, so guards
+   * can await it directly instead of polling authReady() on a timer.
+   * The full Firestore profile document is fetched afterwards in the
+   * background and merged into currentUser() once it lands, so it never
+   * blocks route navigation.
+   */
+  readonly ready: Promise<void>;
+
   constructor(private fb: FirebaseService) {
-    onAuthStateChanged(this.fb.auth, async (firebaseUser: FirebaseUser | null) => {
-      if (!firebaseUser) {
-        this.currentUser.set(null);
+    this.ready = new Promise(resolve => {
+      let resolvedOnce = false;
+      onAuthStateChanged(this.fb.auth, (firebaseUser: FirebaseUser | null) => {
+        if (!firebaseUser) {
+          this.currentUser.set(null);
+          this.authReady.set(true);
+          if (!resolvedOnce) { resolvedOnce = true; resolve(); }
+          return;
+        }
+
+        // Optimistic placeholder so guarded routes/UI unblock immediately.
+        this.currentUser.set({
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          name: firebaseUser.displayName || '',
+          addresses: []
+        });
         this.authReady.set(true);
-        return;
-      }
-      const profileDoc = await getDoc(doc(this.fb.db, 'users', firebaseUser.uid));
-      this.currentUser.set(
-        profileDoc.exists()
-          ? { id: firebaseUser.uid, email: firebaseUser.email || '', ...profileDoc.data() } as AppUser
-          : { id: firebaseUser.uid, email: firebaseUser.email || '', name: firebaseUser.displayName || '', addresses: [] }
-      );
-      this.authReady.set(true);
+        if (!resolvedOnce) { resolvedOnce = true; resolve(); }
+
+        this._loadProfile(firebaseUser);
+      });
     });
+  }
+
+  private async _loadProfile(firebaseUser: FirebaseUser) {
+    const profileDoc = await getDoc(doc(this.fb.db, 'users', firebaseUser.uid));
+    if (profileDoc.exists()) {
+      this.currentUser.set({ id: firebaseUser.uid, email: firebaseUser.email || '', ...profileDoc.data() } as AppUser);
+    }
   }
 
   async register(name: string, email: string, password: string, phone: string): Promise<{ success: boolean; error?: string }> {
@@ -49,9 +75,7 @@ export class AuthService {
       const msg = e.code === 'auth/email-already-in-use' ? 'This email is already registered.' : (e.message || 'Registration failed');
       return { success: false, error: msg };
     }
-  }
-
-  async login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+  }  async login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
       await signInWithEmailAndPassword(this.fb.auth, email, password);
       return { success: true };

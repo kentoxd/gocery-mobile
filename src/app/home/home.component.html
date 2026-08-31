@@ -1,26 +1,107 @@
-<div class="page">
-  <header class="hero">
-    <h1>🛒 Go! Cery</h1>
-    <p>Palengke-Fresh, Delivered Tomorrow</p>
+<div class="page home-page">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="icon-btn" (click)="toggleMenu()" aria-label="Open menu">☰ Menu</button>
+    <a routerLink="/home" class="logo-link" aria-label="Go! Cery home">
+      <img class="logo-img" src="https://res.cloudinary.com/m0uovtom/image/upload/f_auto,q_auto/v1787825182/GOCERY_LOGO.png" width="52" height="44" alt="Go! Cery">
+    </a>
+    <a routerLink="/cart" class="icon-btn icon-btn--cart" aria-label="View cart">
+      🛒 Cart
+      @if (cart.itemCount() > 0) {
+        <span class="badge">{{ cart.itemCount() }}</span>
+      }
+    </a>
   </header>
 
-  <a routerLink="/shop" class="btn btn--primary" style="margin-bottom:1.5rem">Shop All Products</a>
-
-  <h2>Suki Picks</h2>
-  @if (loading()) {
-    <p class="muted">Loading…</p>
-  } @else {
-    <div class="grid">
-      @for (p of featured(); track p.id) {
-        <div class="card product-card">
-          <a [routerLink]="['/product', p.id]" class="product-card__image">
-            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }
-          </a>
-          <a [routerLink]="['/product', p.id]"><strong>{{ p.name }}</strong></a>
-          <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
-          <button class="btn btn--outline" (click)="addToCart(p)">Add to Cart</button>
-        </div>
-      }
+  <!-- Slide-out menu -->
+  @if (menuOpen()) {
+    <div class="menu-overlay" (click)="closeMenu()">
+      <nav class="menu-panel" (click)="$event.stopPropagation()">
+        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
+        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
+        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
+        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
+        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
+        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
+        <button class="menu-close" (click)="closeMenu()">Close</button>
+      </nav>
     </div>
   }
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input
+      [(ngModel)]="search"
+      (keyup.enter)="runSearch()"
+      type="text"
+      placeholder="Search for fresh produce, meat, more…">
+    <button (click)="runSearch()" aria-label="Search">🔍</button>
+  </div>
+
+  <!-- Hero banner -->
+  <section class="hero-banner">
+    <div class="hero-banner__decor" aria-hidden="true">🥬🍊🍅🍆</div>
+    <div class="hero-banner__text">
+      <h1>Palengke-Fresh, Delivered Tomorrow</h1>
+      <p>Fresh produce, seafood & meat — straight to your door.</p>
+      <div class="hero-banner__actions">
+        <a routerLink="/shop" class="btn btn--accent btn--pill">Shop Now</a>
+        <a routerLink="/support" class="btn btn--outline btn--pill">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Best sellers -->
+  <section class="section">
+    <h2 class="section__title">Best Sellers</h2>
+
+    @if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else if (!featured().length) {
+      <p class="muted">No featured products yet.</p>
+    } @else {
+      <div class="rail-wrap">
+        <button class="rail-arrow rail-arrow--prev" (click)="scrollRail(-1)" aria-label="Scroll left">‹</button>
+
+        <div class="rail" #rail>
+          @for (p of featured(); track p.id) {
+            <div class="card product-card">
+              <a [routerLink]="['/product', p.id]" class="product-card__image">
+                @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
+              </a>
+              <a [routerLink]="['/product', p.id]" class="product-card__name"><strong>{{ p.name }}</strong></a>
+              <span class="product-card__unit">per {{ p.variants[0].unit }}</span>
+              <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
+
+              <div class="stepper">
+                <button (click)="changeQty(p, -1)" aria-label="Decrease quantity">−</button>
+                <span>{{ qty(p) }}</span>
+                <button (click)="changeQty(p, 1)" aria-label="Increase quantity">+</button>
+              </div>
+
+              <button class="btn btn--primary" (click)="addToCart(p)">Add to Cart</button>
+            </div>
+          }
+        </div>
+
+        <button class="rail-arrow rail-arrow--next" (click)="scrollRail(1)" aria-label="Scroll right">›</button>
+      </div>
+    }
+  </section>
+
+  <!-- Categories -->
+  <section class="section">
+    <h2 class="section__title">Categories</h2>
+    <div class="category-grid">
+      @for (c of categories; track c.id) {
+        <button class="category-tile" (click)="goToCategory(c.id)">
+          <span class="category-tile__icon">{{ c.icon }}</span>
+          <span class="category-tile__name">{{ c.name }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
 </div>

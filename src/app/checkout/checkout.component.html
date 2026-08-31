@@ -1,19 +1,37 @@
 <div class="page">
-  <h1>Checkout</h1>
+  <div class="page-header">
+    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
+    <h1>Checkout</h1>
+  </div>
+
+  @if (showQrPanel()) {
+    <div class="card">
+      <h2 class="section-title">Scan to Pay with {{ qrMethodName }}</h2>
+      <p class="muted">Open your {{ qrMethodName }} app and scan this QR code to pay the seller directly.</p>
+      <div class="qr-wrap">
+        <img [src]="qrUrl" [alt]="qrMethodName + ' QR code'">
+      </div>
+      <p class="qr-note">Your order has been placed. Payments made this way are confirmed manually — the seller will verify your payment and update your order status once received.</p>
+      <button class="btn btn--primary" style="margin-top:1rem" (click)="goToQrOrder()">View My Order</button>
+    </div>
+  } @else {
 
   <div class="steps">
-    <span [class.active]="step() === 1">1. Address</span>
-    <span [class.active]="step() === 2">2. Delivery</span>
-    <span [class.active]="step() === 3">3. Payment</span>
-    <span [class.active]="step() === 4">4. Review</span>
+    <span [class.active]="step() >= 1">1. Address</span>
+    <span [class.active]="step() >= 2">2. Delivery</span>
+    <span [class.active]="step() >= 3">3. Payment</span>
+    <span [class.active]="step() >= 4">4. Review</span>
+  </div>
+  <div class="steps-track">
+    <div class="steps-track__fill" [style.width.%]="(step() - 1) / 3 * 100"></div>
   </div>
 
   @if (step() === 1) {
     <div class="card">
-      <h2>Shipping Address</h2>
+      <h2 class="section-title">Shipping Address</h2>
       @for (a of auth.currentUser()?.addresses; track a.id) {
         <label class="option">
-          <input type="radio" name="address" [value]="a.id" [(ngModel)]="addressId">
+          <input type="radio" name="address" [value]="a.id" [(ngModel)]="addressId" (change)="zoneId = a.zoneId || zoneId">
           <div><strong>{{ a.label || 'Home' }}</strong><br><span class="muted">{{ a.street }}, {{ a.city }}</span></div>
         </label>
       }
@@ -24,15 +42,48 @@
       @if (showNewAddressForm) {
         <div class="new-address">
           <div class="form-group"><label>Label</label><input [(ngModel)]="newAddress.label" placeholder="Home, Office…"></div>
-          <div class="form-group"><label>Street Address</label><input [(ngModel)]="newAddress.street"></div>
-          <div class="form-group"><label>City / Barangay</label><input [(ngModel)]="newAddress.city"></div>
+
           <div class="form-group">
-            <label>Delivery Zone</label>
-            <select [(ngModel)]="newAddress.zoneId">
-              @for (z of zones; track z.id) { <option [value]="z.id">{{ z.name }} (₱{{ z.fee }})</option> }
+            <label>Region</label>
+            <select [(ngModel)]="selectedRegionId" (ngModelChange)="onRegionChange()">
+              <option value="">Select region…</option>
+              @for (r of regions; track r.psgc_id) { <option [value]="r.psgc_id">{{ r.name }}</option> }
             </select>
           </div>
-          <button class="btn btn--primary" (click)="saveNewAddress()">Save Address</button>
+
+          @if (provinces.length) {
+            <div class="form-group">
+              <label>Province</label>
+              <select [(ngModel)]="selectedProvinceId" (ngModelChange)="onProvinceChange()">
+                <option value="">Select province…</option>
+                @for (p of provinces; track p.psgc_id) { <option [value]="p.psgc_id">{{ p.name }}</option> }
+              </select>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>City / Municipality</label>
+            <select [(ngModel)]="selectedCityId" (ngModelChange)="onCityChange()" [disabled]="!cities.length">
+              <option value="">{{ cities.length ? 'Select city/municipality…' : 'Select a region first' }}</option>
+              @for (c of cities; track c.psgc_id) { <option [value]="c.psgc_id">{{ c.name }}</option> }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Barangay</label>
+            <select [(ngModel)]="selectedBarangayName" (ngModelChange)="onBarangayChange()" [disabled]="!barangays.length">
+              <option value="">{{ barangays.length ? 'Select barangay…' : 'Select a city first' }}</option>
+              @for (b of barangays; track b.psgc_id) { <option [value]="b.name">{{ b.name }}</option> }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Street / House / Unit No.</label>
+            <input [(ngModel)]="newAddress.street" placeholder="House no., street, subdivision">
+          </div>
+
+          @if (addressError()) { <p class="form-error">{{ addressError() }}</p> }
+          <button class="btn btn--primary btn--sm" (click)="saveNewAddress()">Save Address</button>
         </div>
       }
     </div>
@@ -41,7 +92,7 @@
 
   @if (step() === 2) {
     <div class="card">
-      <h2>Delivery Schedule</h2>
+      <h2 class="section-title">Delivery Schedule</h2>
       <p class="muted">Delivery date: <strong>{{ deliveryDate }}</strong></p>
       <div class="form-group">
         <label>Delivery Zone</label>
@@ -58,7 +109,7 @@
         }
       </div>
     </div>
-    <div class="btn-row">
+    <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn--outline" (click)="step.set(1)">Back</button>
       <button class="btn btn--primary" (click)="step.set(3)">Continue to Payment</button>
     </div>
@@ -66,11 +117,14 @@
 
   @if (step() === 3) {
     <div class="card">
-      <h2>Payment Method</h2>
+      <h2 class="section-title">Payment Method</h2>
       @for (m of paymentMethods; track m.id) {
         <label class="option">
           <input type="radio" name="payment" [value]="m.id" [(ngModel)]="paymentMethod"> {{ m.icon }} {{ m.name }}
         </label>
+      }
+      @if (paymentMethod === 'gcash' || paymentMethod === 'maya') {
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ paymentMethod === 'gcash' ? 'GCash' : 'Maya' }} payments are verified manually by the seller after you scan their QR code.</p>
       }
       @if (paymentMethod === 'card') {
         <div class="card-fields">
@@ -83,8 +137,17 @@
           <p class="muted" style="font-size:0.8rem">Sandbox test card: 4571 7360 0000 0008</p>
         </div>
       }
+
+      <div class="form-group" style="margin-top:1rem">
+        <label>Promo Code</label>
+        <div class="promo-row">
+          <input [(ngModel)]="promoInput" placeholder="Enter code">
+          <button class="btn btn--outline btn--sm" (click)="applyPromo()">Apply</button>
+        </div>
+      </div>
+      @if (error()) { <p class="form-error">{{ error() }}</p> }
     </div>
-    <div class="btn-row">
+    <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn--outline" (click)="step.set(2)">Back</button>
       <button class="btn btn--primary" (click)="step.set(4)">Review Order</button>
     </div>
@@ -92,22 +155,25 @@
 
   @if (step() === 4) {
     <div class="card">
-      <h2>Review Your Order</h2>
+      <h2 class="section-title">Review Your Order</h2>
       @for (item of cart.cartItems(); track item.productId + item.variantId) {
         <div class="summary-row"><span>{{ item.quantity }}x {{ item.product.name }}</span><span>₱{{ (item.variant.price * item.quantity).toFixed(2) }}</span></div>
       }
       <hr>
       <div class="summary-row"><span>Subtotal</span><span>₱{{ cart.subtotal().toFixed(2) }}</span></div>
+      @if (discount) { <div class="summary-row"><span>Discount ({{ promoCode }})</span><span>-₱{{ discount.toFixed(2) }}</span></div> }
       <div class="summary-row"><span>Delivery</span><span>{{ deliveryFee === 0 ? 'FREE' : '₱' + deliveryFee.toFixed(2) }}</span></div>
       <div class="summary-row total"><span>Total</span><span>₱{{ estimatedTotal.toFixed(2) }}</span></div>
       <p class="muted" style="font-size:0.8rem">Final total is confirmed by the server and may differ slightly if prices or stock changed.</p>
       @if (error()) { <p class="form-error">{{ error() }}</p> }
     </div>
-    <div class="btn-row">
+    <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn--outline" (click)="step.set(3)">Back</button>
       <button class="btn btn--primary" [disabled]="placing()" (click)="placeOrder()">
         {{ placing() ? 'Placing Order…' : 'Place Order' }}
       </button>
     </div>
+  }
+
   }
 </div>

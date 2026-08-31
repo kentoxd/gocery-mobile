@@ -1,0 +1,39 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Customer Reviews</h1>
+  </div>
+  <p class="muted" style="margin-bottom:1rem">See what our suki customers have to say.</p>
+
+  @if (loading()) {
+    <p class="muted">Loading reviews…</p>
+  } @else if (!reviews().length) {
+    <div class="empty-state">
+      <span class="empty-state__icon">★</span>
+      <h2>No reviews yet</h2>
+      <p class="muted">Be the first to review a product.</p>
+    </div>
+  } @else {
+    @for (r of reviews(); track r.id) {
+      <div class="card review-card">
+        @if (productFor(r); as product) {
+          <a class="review-card__product" [routerLink]="['/product', product.id]">
+            <div class="review-card__thumb">
+              @if (product.imageUrl) { <img [src]="product.imageUrl" [alt]="product.name"> }
+              @else { <span>{{ product.image }}</span> }
+            </div>
+            <div>
+              <strong>{{ product.name }}</strong>
+              <small class="muted">₱{{ minPrice(product).toFixed(2) }}</small>
+            </div>
+          </a>
+        }
+        <div class="review-card__header">
+          <strong>{{ r.userName || 'Customer' }}</strong>
+          <span class="review-card__rating">{{ '⭐'.repeat(r.rating) }}</span>
+        </div>
+        <p>{{ r.comment }}</p>
+        <small class="muted">{{ r.date }}{{ r.verified ? ' · Verified Purchase' : '' }}</small>
+      </div>
+    }
+  }
+</div>

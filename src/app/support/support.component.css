@@ -2,3 +2,7 @@
 .faq summary { font-weight: 600; cursor: pointer; }
 .faq p { margin-top: 0.5rem; }
 .success { background: #d4edda; color: #155724; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.contact-card { display: flex; flex-direction: column; gap: 0.2rem; text-align: center; align-items: center; }
+.contact-card__icon { font-size: 1.3rem; color: var(--color-primary); margin-bottom: 0.2rem; }
+.contact-card a { text-decoration: none; }

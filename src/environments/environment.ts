@@ -13,5 +13,13 @@ export const environment = {
     storageBucket: 'go--cery.firebasestorage.app',
     messagingSenderId: '350476021469',
     appId: '1:350476021469:web:61e5a14de632334898f534'
+  },
+  // Same EmailJS project as the web app (js/config.emailjs.js) — sends the
+  // registration OTP email. Template variables: {{email}} {{user_name}}
+  // {{passcode}} {{time}} {{message}}.
+  emailjs: {
+    serviceId: 'service_x016mmu',
+    templateId: 'template_uos5tae',
+    publicKey: 'mA-WV0TFP3RLbMJzb'
   }
 };
