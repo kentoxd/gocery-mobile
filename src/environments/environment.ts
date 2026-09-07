@@ -1,11 +1,12 @@
 /**
- * Same Firebase project and backend as the web app (js/config.firebase.js
- * and js/config.js in the main project) — this mobile client reads/writes
- * the exact same Firestore data and hits the exact same Express backend.
+ * Same Firebase project as the web app (js/config.firebase.js and
+ * js/config.js in the main project) — this mobile client reads/writes
+ * the exact same Firestore data. Order creation, pricing, and inventory
+ * now happen entirely client-side (see core/order-create.service.ts) —
+ * there's no backend to point at.
  */
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:3000',
   firebase: {
     apiKey: 'AIzaSyDmr7iIYX21BmJ1LzsGOzVpsfJp33DwTWc',
     authDomain: 'go--cery.firebaseapp.com',

@@ -4,31 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../core/cart.service';
 import { AuthService } from '../core/auth.service';
-import { ApiService } from '../core/api.service';
+import { OrderCreateService, OrderCreateError } from '../core/order-create.service';
 import { PsgcService, PsgcNode } from '../core/psgc.service';
 import { CmsService } from '../core/cms.service';
+import { ZONES, SLOTS, PROMO_CODES, FREE_DELIVERY_THRESHOLD } from '../core/pricing.config';
 
-// Zone ids/fees must match server/config.js exactly — the server is the
-// pricing source of truth and rejects any zoneId it doesn't recognize.
-const ZONES = [
-  { id: 'metro-manila', name: 'Metro Manila (NCR)', fee: 99 },
-  { id: 'rizal', name: 'Rizal Province', fee: 149 }
-];
-const SLOTS = [
-  { id: 'morning', label: '8:00 AM – 12:00 PM' },
-  { id: 'afternoon', label: '1:00 PM – 5:00 PM' },
-  { id: 'evening', label: '5:00 PM – 8:00 PM' }
-];
 const PAYMENT_METHODS = [
   { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
   { id: 'gcash', name: 'GCash', icon: '📱' },
-  { id: 'maya', name: 'Maya', icon: '💳' },
-  { id: 'card', name: 'Credit/Debit Card', icon: '💳' }
+  { id: 'maya', name: 'Maya', icon: '💳' }
 ];
-const PROMO_CODES: Record<string, { type: 'percent' | 'free_shipping'; value?: number }> = {
-  SUKI10: { type: 'percent', value: 0.10 },
-  FREESHIP: { type: 'free_shipping' }
-};
 
 function isManualQrPayment(method: string): boolean {
   return method === 'gcash' || method === 'maya';
@@ -53,10 +38,6 @@ export class CheckoutComponent implements OnInit {
   slotId = SLOTS[0].id;
   deliveryDate = this.nextDeliveryDate();
   paymentMethod = 'cod';
-  cardNumber = '4571 7360 0000 0008';
-  cardExpMonth = '12';
-  cardExpYear = '2028';
-  cardCvc = '123';
   promoInput = '';
   promoCode = '';
   discount = 0;
@@ -86,7 +67,7 @@ export class CheckoutComponent implements OnInit {
   constructor(
     public cart: CartService,
     public auth: AuthService,
-    private api: ApiService,
+    private orderCreate: OrderCreateService,
     private psgc: PsgcService,
     private cms: CmsService,
     private router: Router,
@@ -117,7 +98,7 @@ export class CheckoutComponent implements OnInit {
     if (this.freeShip) return 0;
     const zone = this.zones.find(z => z.id === this.zoneId);
     if (!zone) return 0;
-    return this.cart.subtotal() >= 4000 ? 0 : zone.fee;
+    return this.cart.subtotal() >= FREE_DELIVERY_THRESHOLD ? 0 : zone.fee;
   }
 
   get estimatedTotal(): number {
@@ -222,95 +203,35 @@ export class CheckoutComponent implements OnInit {
       promoCode: this.promoCode
     };
 
-    const order = await this.api.createOrder(orderPayload);
-    if (!order.success) {
-      this.error.set(order.error || 'Could not create order.');
+    let order: { id: string; total: number };
+    try {
+      order = await this.orderCreate.createOrder(orderPayload);
+    } catch (e: any) {
+      this.error.set(e instanceof OrderCreateError ? e.message : 'Could not create order.');
       this.placing.set(false);
       return;
     }
 
     if (this.paymentMethod === 'cod') {
       this.cart.clear();
-      this.router.navigate(['/orders', order.data!.id]);
+      this.router.navigate(['/orders', order.id]);
       return;
     }
 
-    if (isManualQrPayment(this.paymentMethod)) {
-      const qrCodes = await this.cms.getPaymentQrCodes();
-      const url = this.paymentMethod === 'gcash' ? qrCodes.gcashQrUrl : qrCodes.mayaQrUrl;
-      if (!url) {
-        this.error.set(`${method?.name} isn't set up yet — please choose a different payment method.`);
-        this.placing.set(false);
-        return;
-      }
-      this.cart.clear();
-      this.qrUrl = url;
-      this.qrOrderId = order.data!.id;
-      this.qrMethodName = method?.name || '';
-      this.showQrPanel.set(true);
+    // GCash/Maya — manual QR, no live payment API call needed.
+    const qrCodes = await this.cms.getPaymentQrCodes();
+    const url = this.paymentMethod === 'gcash' ? qrCodes.gcashQrUrl : qrCodes.mayaQrUrl;
+    if (!url) {
+      this.error.set(`${method?.name} isn't set up yet — please choose a different payment method.`);
       this.placing.set(false);
       return;
     }
-
-    // Card — PayMongo Payment Intent + attach flow, same as the web app.
-    const intent = await this.api.createPaymentIntent(order.data!.id);
-    if (!intent.success) {
-      this.error.set(intent.error || 'Payment setup failed.');
-      this.placing.set(false);
-      return;
-    }
-    const config = await this.api.getPaymentConfig();
-    if (!config.success) {
-      this.error.set('Payment is not available right now.');
-      this.placing.set(false);
-      return;
-    }
-
-    try {
-      const authHeader = 'Basic ' + btoa(`${config.data!.publicKey}:`);
-      const pmRes = await fetch('https://api.paymongo.com/v1/payment_methods', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: authHeader },
-        body: JSON.stringify({
-          data: {
-            attributes: {
-              type: 'card',
-              billing: { name: user.name, email: user.email },
-              details: {
-                card_number: this.cardNumber.replace(/\s+/g, ''),
-                exp_month: parseInt(this.cardExpMonth, 10),
-                exp_year: parseInt(this.cardExpYear, 10),
-                cvc: this.cardCvc
-              }
-            }
-          }
-        })
-      });
-      const pmBody = await pmRes.json();
-      if (!pmRes.ok) throw new Error(pmBody?.errors?.[0]?.detail || 'Could not save card details.');
-
-      const returnUrl = `${window.location.origin}/orders/${order.data!.id}`;
-      const attachRes = await fetch(`https://api.paymongo.com/v1/payment_intents/${intent.data!.paymentIntentId}/attach`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: authHeader },
-        body: JSON.stringify({
-          data: { attributes: { payment_method: pmBody.data.id, client_key: intent.data!.clientKey, return_url: returnUrl } }
-        })
-      });
-      const attachBody = await attachRes.json();
-      if (!attachRes.ok) throw new Error(attachBody?.errors?.[0]?.detail || 'Payment could not be processed.');
-
-      this.cart.clear();
-      const redirectUrl = attachBody.data.attributes.next_action?.redirect?.url;
-      if (redirectUrl) {
-        window.location.href = redirectUrl; // 3D Secure — browser must go here
-      } else {
-        this.router.navigate(['/orders', order.data!.id]);
-      }
-    } catch (e: any) {
-      this.error.set(e.message || 'Payment failed. Please try again.');
-      this.placing.set(false);
-    }
+    this.cart.clear();
+    this.qrUrl = url;
+    this.qrOrderId = order.id;
+    this.qrMethodName = method?.name || '';
+    this.showQrPanel.set(true);
+    this.placing.set(false);
   }
 
   goToQrOrder() {

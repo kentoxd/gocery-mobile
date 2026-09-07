@@ -126,17 +126,6 @@
       @if (paymentMethod === 'gcash' || paymentMethod === 'maya') {
         <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ paymentMethod === 'gcash' ? 'GCash' : 'Maya' }} payments are verified manually by the seller after you scan their QR code.</p>
       }
-      @if (paymentMethod === 'card') {
-        <div class="card-fields">
-          <div class="form-group"><label>Card Number</label><input [(ngModel)]="cardNumber"></div>
-          <div class="row">
-            <div class="form-group"><label>Exp Month</label><input [(ngModel)]="cardExpMonth"></div>
-            <div class="form-group"><label>Exp Year</label><input [(ngModel)]="cardExpYear"></div>
-            <div class="form-group"><label>CVC</label><input [(ngModel)]="cardCvc"></div>
-          </div>
-          <p class="muted" style="font-size:0.8rem">Sandbox test card: 4571 7360 0000 0008</p>
-        </div>
-      }
 
       <div class="form-group" style="margin-top:1rem">
         <label>Promo Code</label>
