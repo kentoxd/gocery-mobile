@@ -82,6 +82,15 @@
             <input [(ngModel)]="newAddress.street" placeholder="House no., street, subdivision">
           </div>
 
+          <div class="form-group">
+            <button type="button" class="btn btn--outline btn--sm" (click)="openLocationPicker()">
+              📍 {{ newAddress.lat ? 'Pin Set — Edit Location' : 'Pin Delivery Location on Map' }}
+            </button>
+            @if (newAddress.lat) {
+              <p class="muted" style="font-size:0.8rem;margin-top:0.35rem">Pinned at {{ newAddress.lat.toFixed(5) }}, {{ newAddress.lng!.toFixed(5) }}</p>
+            }
+          </div>
+
           @if (addressError()) { <p class="form-error">{{ addressError() }}</p> }
           <button class="btn btn--primary btn--sm" (click)="saveNewAddress()">Save Address</button>
         </div>
@@ -164,5 +173,14 @@
     </div>
   }
 
+  }
+
+  @if (showLocationPicker()) {
+    <app-location-picker
+      [initialLat]="newAddress.lat || 14.6255"
+      [initialLng]="newAddress.lng || 121.0517"
+      (confirmed)="onLocationConfirmed($event)"
+      (cancelled)="showLocationPicker.set(false)">
+    </app-location-picker>
   }
 </div>

@@ -1,0 +1,41 @@
+<div class="picker-overlay">
+  <div class="picker-sheet">
+    <div class="picker-header">
+      <button class="page-header__back" (click)="close()" aria-label="Close">←</button>
+      <h2>Pin Delivery Location</h2>
+    </div>
+
+    <div class="picker-search">
+      <input
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="search()"
+        placeholder="Search a street, barangay, landmark…">
+      <button class="btn btn--outline btn--sm" (click)="search()" [disabled]="searching()">
+        {{ searching() ? '…' : 'Search' }}
+      </button>
+    </div>
+
+    @if (searchResults.length) {
+      <div class="picker-results">
+        @for (r of searchResults; track r.name) {
+          <button class="picker-result" (click)="selectResult(r)">{{ r.name }}</button>
+        }
+      </div>
+    }
+
+    @if (error()) { <p class="form-error" style="margin:0.5rem 0.85rem">{{ error() }}</p> }
+
+    <div class="picker-map-wrap">
+      <div #mapEl class="picker-map"></div>
+      <div class="picker-pin" aria-hidden="true">📍</div>
+      <button class="picker-locate" (click)="useMyLocation()" [disabled]="locating()" aria-label="Use my current location">
+        {{ locating() ? '…' : '⊙' }}
+      </button>
+    </div>
+
+    <div class="picker-footer">
+      <p class="picker-address">{{ resolvedAddress() || 'Move the map to set your pin…' }}</p>
+      <button class="btn btn--primary" (click)="confirm()">Use This Location</button>
+    </div>
+  </div>
+</div>

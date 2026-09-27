@@ -6,6 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#2f6d4f">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!--
+    Mapbox GL JS is loaded as a plain script + stylesheet (copied into
+    assets/mapbox-gl at build time from node_modules — see angular.json),
+    the same way the web app loads it. Importing it as a JS module instead
+    hits a known Angular dev-server (Vite) bundling bug with this package
+    ("__async is not defined"), so it's kept out of the module graph
+    entirely; the checkout location-picker reads it off `window.mapboxgl`.
+  -->
+  <link rel="stylesheet" href="assets/mapbox-gl/mapbox-gl.css">
+  <script src="assets/mapbox-gl/mapbox-gl.js"></script>
 </head>
 <body>
   <app-root></app-root>

@@ -8,6 +8,7 @@ import { OrderCreateService, OrderCreateError } from '../core/order-create.servi
 import { PsgcService, PsgcNode } from '../core/psgc.service';
 import { CmsService } from '../core/cms.service';
 import { ZONES, SLOTS, PROMO_CODES, FREE_DELIVERY_THRESHOLD } from '../core/pricing.config';
+import { LocationPickerComponent, PickedLocation } from './location-picker/location-picker.component';
 
 const PAYMENT_METHODS = [
   { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
@@ -22,7 +23,7 @@ function isManualQrPayment(method: string): boolean {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LocationPickerComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css'
 })
@@ -44,7 +45,7 @@ export class CheckoutComponent implements OnInit {
   freeShip = false;
 
   // --- New-address form: PSGC cascading Region → Province → City → Barangay ---
-  newAddress = { label: '', street: '', city: '', region: '', province: '', zoneId: ZONES[0].id };
+  newAddress = { label: '', street: '', city: '', region: '', province: '', zoneId: ZONES[0].id, lat: null as number | null, lng: null as number | null };
   regions: PsgcNode[] = [];
   provinces: PsgcNode[] = [];
   cities: PsgcNode[] = [];
@@ -54,6 +55,9 @@ export class CheckoutComponent implements OnInit {
   selectedCityId = '';
   selectedBarangayName = '';
   addressError = signal('');
+
+  // --- Mapbox "pin on map" delivery location picker ---
+  showLocationPicker = signal(false);
 
   // --- Manual GCash/Maya QR payment panel ---
   showQrPanel = signal(false);
@@ -167,6 +171,20 @@ export class CheckoutComponent implements OnInit {
     this.newAddress.city = parts.join(', ');
   }
 
+  // --- Mapbox pin picker ---
+  openLocationPicker() {
+    this.showLocationPicker.set(true);
+  }
+
+  onLocationConfirmed(loc: PickedLocation) {
+    this.newAddress.lat = loc.lat;
+    this.newAddress.lng = loc.lng;
+    // Only overwrite the street field if the user hasn't already typed one,
+    // so a manual entry is never silently replaced by the reverse-geocoded text.
+    if (!this.newAddress.street.trim()) this.newAddress.street = loc.address;
+    this.showLocationPicker.set(false);
+  }
+
   async saveNewAddress() {
     this.addressError.set('');
     if (!this.selectedCityId || !this.newAddress.street.trim()) {
@@ -178,7 +196,9 @@ export class CheckoutComponent implements OnInit {
       street: this.newAddress.street,
       city: this.newAddress.city,
       region: this.newAddress.region,
-      zoneId: this.newAddress.zoneId
+      zoneId: this.newAddress.zoneId,
+      lat: this.newAddress.lat,
+      lng: this.newAddress.lng
     });
     const user = this.auth.currentUser();
     this.addressId = user?.addresses?.[user.addresses.length - 1]?.id || '';
