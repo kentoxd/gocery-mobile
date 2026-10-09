@@ -1,0 +1,33 @@
+<div class="card product-card">
+  <a [routerLink]="['/product', product.id]" class="product-card__image">
+    @if (product.imageUrl) { <img [src]="product.imageUrl" [alt]="product.name" loading="lazy"> } @else { <span>{{ product.image }}</span> }
+    @if (soldOut) { <span class="pc-badge pc-badge--sold">Sold out</span> }
+    @else if (lowStock) { <span class="pc-badge pc-badge--low">Only {{ totalStock }} left</span> }
+  </a>
+  <a [routerLink]="['/product', product.id]" class="product-card__name"><strong>{{ product.name }}</strong></a>
+
+  @if (product.variants.length > 1 && !soldOut) {
+    <select class="pc-variant" [(ngModel)]="variantId" [attr.aria-label]="'Choose size for ' + product.name">
+      @for (v of product.variants; track v.id) {
+        <option [value]="v.id" [disabled]="v.stock <= 0">{{ v.unit }} – ₱{{ v.price.toFixed(2) }}{{ v.stock <= 0 ? ' (sold out)' : '' }}</option>
+      }
+    </select>
+  }
+
+  <div class="pc-price">
+    <span class="price">₱{{ variant.price.toFixed(2) }}</span>
+    <small>/ {{ variant.unit }}</small>
+  </div>
+
+  @if (showQty && !soldOut) {
+    <div class="stepper pc-stepper">
+      <button (click)="changeQty(-1)" aria-label="Decrease quantity">−</button>
+      <span>{{ quantity }}</span>
+      <button (click)="changeQty(1)" aria-label="Increase quantity">+</button>
+    </div>
+  }
+
+  <button class="btn btn--primary pc-add" [disabled]="soldOut" (click)="add()">
+    {{ soldOut ? 'Sold out' : 'Add to Cart' }}
+  </button>
+</div>

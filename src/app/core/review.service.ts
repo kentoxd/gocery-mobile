@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { collection, getDocs, addDoc, query, where, limit } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import { CloudinaryService } from './cloudinary.service';
 
 export interface Review {
   id: string;
@@ -12,6 +13,7 @@ export interface Review {
   date: string;
   orderId?: string;
   verified?: boolean;
+  images?: string[];
 }
 
 /**
@@ -21,7 +23,7 @@ export interface Review {
  */
 @Injectable({ providedIn: 'root' })
 export class ReviewService {
-  constructor(private fb: FirebaseService) {}
+  constructor(private fb: FirebaseService, private cloud: CloudinaryService) {}
 
   async getByProduct(productId: string): Promise<Review[]> {
     const snap = await getDocs(query(collection(this.fb.db, 'reviews'), where('productId', '==', productId)));
@@ -64,7 +66,7 @@ export class ReviewService {
     return !snap.empty;
   }
 
-  async add(review: { productId: string; userId: string; userName: string; rating: number; comment: string }): Promise<{ success: boolean; error?: string }> {
+  async add(review: { productId: string; userId: string; userName: string; rating: number; comment: string }, photos: File[] = []): Promise<{ success: boolean; error?: string }> {
     const eligibleOrder = await this.getEligibleOrder(review.userId, review.productId);
     if (!eligibleOrder) {
       return { success: false, error: 'You can only review a product after it has been delivered to you.' };
@@ -72,8 +74,17 @@ export class ReviewService {
     if (await this.hasReviewed(review.userId, review.productId)) {
       return { success: false, error: 'You\u2019ve already reviewed this product.' };
     }
+    let images: string[] = [];
+    if (photos.length) {
+      try {
+        images = await this.cloud.uploadMany(photos, 'reviews/' + review.productId, 3);
+      } catch (e: any) {
+        return { success: false, error: e.message || 'Could not upload your photos.' };
+      }
+    }
     await addDoc(collection(this.fb.db, 'reviews'), {
       ...review,
+      images,
       orderId: eligibleOrder.id,
       date: new Date().toISOString().split('T')[0]
     });

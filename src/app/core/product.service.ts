@@ -32,9 +32,19 @@ export interface Product {
 export class ProductService {
   constructor(private fb: FirebaseService) {}
 
-  async getAll(): Promise<Product[]> {
+  // Keep the catalogue for a minute so moving between screens doesn't re-read every product.
+  private cache: { time: number; data: Product[] } | null = null;
+
+  async getAll(forceFresh = false): Promise<Product[]> {
+    if (!forceFresh && this.cache && Date.now() - this.cache.time < 60000) return this.cache.data;
     const snap = await getDocs(collection(this.fb.db, 'products'));
-    return snap.docs.map(d => this._withOptimizedImage({ id: d.id, ...d.data() } as Product));
+    const data = snap.docs.map(d => this._withOptimizedImage({ id: d.id, ...d.data() } as Product));
+    this.cache = { time: Date.now(), data };
+    return data;
+  }
+
+  clearCache() {
+    this.cache = null;
   }
 
   async getById(id: string): Promise<Product | null> {

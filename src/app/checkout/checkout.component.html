@@ -154,11 +154,11 @@
   @if (step() === 4) {
     <div class="card">
       <h2 class="section-title">Review Your Order</h2>
-      @for (item of cart.cartItems(); track item.productId + item.variantId) {
+      @for (item of cart.selectedItems(); track item.productId + item.variantId) {
         <div class="summary-row"><span>{{ item.quantity }}x {{ item.product.name }}</span><span>₱{{ (item.variant.price * item.quantity).toFixed(2) }}</span></div>
       }
       <hr>
-      <div class="summary-row"><span>Subtotal</span><span>₱{{ cart.subtotal().toFixed(2) }}</span></div>
+      <div class="summary-row"><span>Subtotal</span><span>₱{{ cart.selectedSubtotal().toFixed(2) }}</span></div>
       @if (discount) { <div class="summary-row"><span>Discount ({{ promoCode }})</span><span>-₱{{ discount.toFixed(2) }}</span></div> }
       <div class="summary-row"><span>Delivery</span><span>{{ deliveryFee === 0 ? 'FREE' : '₱' + deliveryFee.toFixed(2) }}</span></div>
       <div class="summary-row total"><span>Total</span><span>₱{{ estimatedTotal.toFixed(2) }}</span></div>

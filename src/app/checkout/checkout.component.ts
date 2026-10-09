@@ -79,9 +79,29 @@ export class CheckoutComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Nothing picked in the cart: go back and pick items first.
+    if (!this.cart.selectedCount()) {
+      this.router.navigate(['/cart']);
+      return;
+    }
     const user = this.auth.currentUser();
-    if (user?.addresses?.length) this.addressId = user.addresses[0].id;
-    else this.showNewAddressForm = true;
+    // Start from the address and payment method used last time.
+    let last: any = {};
+    try { last = JSON.parse(localStorage.getItem('gocery_last_checkout') || '{}'); } catch { last = {}; }
+    if (user?.addresses?.length) {
+      let remembered = null;
+      for (let i = 0; i < user.addresses.length; i++) {
+        if (user.addresses[i].id === last.addressId) remembered = user.addresses[i];
+      }
+      const chosen = remembered || user.addresses[0];
+      this.addressId = chosen.id;
+      if (chosen.zoneId) this.zoneId = chosen.zoneId;
+    } else {
+      this.showNewAddressForm = true;
+    }
+    for (let i = 0; i < this.paymentMethods.length; i++) {
+      if (this.paymentMethods[i].id === last.paymentMethod) this.paymentMethod = last.paymentMethod;
+    }
     this.regions = this.psgc.getRegions();
   }
 
@@ -102,11 +122,11 @@ export class CheckoutComponent implements OnInit {
     if (this.freeShip) return 0;
     const zone = this.zones.find(z => z.id === this.zoneId);
     if (!zone) return 0;
-    return this.cart.subtotal() >= FREE_DELIVERY_THRESHOLD ? 0 : zone.fee;
+    return this.cart.selectedSubtotal() >= FREE_DELIVERY_THRESHOLD ? 0 : zone.fee;
   }
 
   get estimatedTotal(): number {
-    return Math.max(0, this.cart.subtotal() - this.discount) + this.deliveryFee;
+    return Math.max(0, this.cart.selectedSubtotal() - this.discount) + this.deliveryFee;
   }
 
   applyPromo() {
@@ -115,7 +135,7 @@ export class CheckoutComponent implements OnInit {
     if (!promo) { this.addressError.set(''); this.error.set('Invalid promo code'); return; }
     this.error.set('');
     if (promo.type === 'percent') {
-      this.discount = this.cart.subtotal() * (promo.value || 0);
+      this.discount = this.cart.selectedSubtotal() * (promo.value || 0);
       this.promoCode = code;
       this.freeShip = false;
     } else if (promo.type === 'free_shipping') {
@@ -213,8 +233,9 @@ export class CheckoutComponent implements OnInit {
     this.error.set('');
 
     const method = this.paymentMethods.find(m => m.id === this.paymentMethod);
+    localStorage.setItem('gocery_last_checkout', JSON.stringify({ addressId: this.addressId, paymentMethod: this.paymentMethod }));
     const orderPayload = {
-      items: this.cart.cartItems().map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
+      items: this.cart.selectedItems().map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
       addressId: this.addressId,
       zoneId: this.zoneId,
       slotId: this.slotId,
@@ -233,7 +254,7 @@ export class CheckoutComponent implements OnInit {
     }
 
     if (this.paymentMethod === 'cod') {
-      this.cart.clear();
+      this.cart.removePaidItems();
       this.router.navigate(['/orders', order.id]);
       return;
     }
@@ -246,7 +267,7 @@ export class CheckoutComponent implements OnInit {
       this.placing.set(false);
       return;
     }
-    this.cart.clear();
+    this.cart.removePaidItems();
     this.qrUrl = url;
     this.qrOrderId = order.id;
     this.qrMethodName = method?.name || '';

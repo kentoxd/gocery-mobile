@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { OrderService } from '../core/order.service';
 import { AuthService } from '../core/auth.service';
+import { NotificationService, NOTIF_SEEN_KEY } from '../core/notification.service';
 
 interface Notification {
   orderId: string;
@@ -11,7 +12,6 @@ interface Notification {
   timestamp: string;
 }
 
-const SEEN_KEY = 'gocery_mobile_notif_seen';
 
 @Component({
   selector: 'app-notifications',
@@ -25,7 +25,7 @@ export class NotificationsComponent implements OnInit {
   lastSeen: string | null = null;
   loading = signal(true);
 
-  constructor(private orderService: OrderService, private auth: AuthService) {}
+  constructor(private orderService: OrderService, private auth: AuthService, private notif: NotificationService) {}
 
   async ngOnInit() {
     const user = this.auth.currentUser();
@@ -38,8 +38,8 @@ export class NotificationsComponent implements OnInit {
       }))
     ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    this.lastSeen = localStorage.getItem(SEEN_KEY);
-    localStorage.setItem(SEEN_KEY, new Date().toISOString());
+    this.lastSeen = localStorage.getItem(NOTIF_SEEN_KEY);
+    this.notif.markSeen();
 
     this.notifications.set(feed);
     this.loading.set(false);

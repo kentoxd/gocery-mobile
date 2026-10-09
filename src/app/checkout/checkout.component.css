@@ -15,5 +15,5 @@ hr { margin: 0.75rem 0; border: none; border-top: 1px solid var(--color-border);
 .promo-row input { flex: 1; }
 .promo-row .btn { width: auto; }
 .qr-wrap { text-align: center; margin: 1.25rem 0; }
-.qr-wrap img { width: 220px; height: 220px; border: 1px solid var(--color-border); border-radius: var(--radius); object-fit: contain; }
+.qr-wrap img { width: 100%; max-width: 300px; height: auto; border: 1px solid var(--color-border); border-radius: var(--radius); object-fit: contain; background: #fff; }
 .qr-note { background: #e7f3ff; border: 1px solid #b6d7ff; border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.85rem; }

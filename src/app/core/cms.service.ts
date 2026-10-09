@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 import { doc, getDoc } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import { SEED_RECIPES } from './recipes-seed';
+
+export interface RecipeIngredient {
+  name: string;
+  amount?: string;
+  /** When set, the ingredient can be ordered straight from the recipe. */
+  productId?: string;
+  variantId?: string;
+  qty?: number;
+}
 
 export interface RecipePost {
   id: string;
@@ -10,6 +20,13 @@ export interface RecipePost {
   category?: string;
   image?: string;
   date?: string;
+  servings?: number | string;
+  prepTime?: string;
+  cookTime?: string;
+  difficulty?: string;
+  ingredients?: RecipeIngredient[];
+  steps?: string[];
+  tips?: string[];
 }
 
 export interface FaqItem { q: string; a: string; }
@@ -35,7 +52,7 @@ export class CmsService {
 
   async getRecipes(): Promise<RecipePost[]> {
     const cms = await this._getCms();
-    return cms.recipes || cms.blogPosts || [];
+    return (cms.recipes && cms.recipes.length) ? cms.recipes : SEED_RECIPES;
   }
 
   async getFaq(): Promise<FaqItem[]> {

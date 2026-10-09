@@ -4,7 +4,7 @@
   </div>
 
   @if (loading()) {
-    <p class="muted">Loading…</p>
+    @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!products().length) {
     <div class="empty-state">
       <span class="empty-state__icon">🤍</span>
@@ -19,7 +19,7 @@
         </div>
         <div class="wishlist-item__info">
           <strong>{{ p.name }}</strong>
-          <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
+          <span class="price">₱{{ p.variants[0].price.toFixed(2) }} <small class="muted">/ {{ p.variants[0].unit }}</small></span>
           <div class="actions">
             <button class="btn btn--primary btn--sm" (click)="moveToCart(p)">Add to Cart</button>
             <button class="btn btn--outline btn--sm" (click)="remove(p.id)">Remove</button>

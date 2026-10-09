@@ -4,12 +4,30 @@
     <h1>Order {{ o.id.slice(0, 8) }}</h1>
   </div>
 
+  <p class="status-msg">{{ statusMessage }}</p>
+
+  @if (needsReceipt) {
+    <div class="card receipt-card">
+      @if (!o.receiptUrl) {
+        <p class="receipt-alert" role="alert">Action needed: upload your payment receipt so we can confirm your order.</p>
+      } @else {
+        <p class="receipt-ok">Receipt received. The seller will verify your payment.</p>
+        <img class="receipt-img" [src]="o.receiptUrl" alt="Your payment receipt">
+      }
+      <label class="btn btn--accent receipt-btn" [class.is-busy]="busy()">
+        {{ busy() ? 'Uploading…' : (o.receiptUrl ? 'Replace receipt' : 'Upload receipt') }}
+        <input type="file" accept="image/*" hidden [disabled]="busy()" (change)="onReceiptPicked($event)">
+      </label>
+    </div>
+  }
+
   @if (o.status !== 'Cancelled' && o.status !== 'Refunded') {
     <div class="tracker">
       @for (s of statusSteps; track s; let i = $index) {
         <div class="step" [class.done]="i <= currentStepIndex">
           <div class="dot"></div>
           <span>{{ s }}</span>
+          <small class="step-date">{{ stepDate(s) ? (stepDate(s) | date:'MMM d, h:mm a') : '' }}</small>
         </div>
       }
     </div>
@@ -33,6 +51,11 @@
     <h2 class="section-title">Delivery Details</h2>
     <p><strong>Address:</strong> {{ o.address?.street }}, {{ o.address?.city }}</p>
     <p><strong>Date &amp; Slot:</strong> {{ o.deliveryDate }} · {{ o.deliverySlot }}</p>
-    <p><strong>Payment:</strong> {{ o.paymentMethod }} ({{ o.paymentStatus }})</p>
+    <p><strong>Payment:</strong> {{ o.paymentMethod }} · {{ paymentLabel }}</p>
   </div>
+
+  @if (o.status === 'Pending') {
+    <button class="btn btn--danger" [disabled]="busy()" (click)="cancelOrder()">Cancel Order</button>
+  }
+  @if (actionError()) { <p class="form-error" role="alert">{{ actionError() }}</p> }
 </div>

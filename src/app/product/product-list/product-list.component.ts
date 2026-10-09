@@ -3,11 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ProductService, Product, CATEGORIES } from '../../core/product.service';
 import { CartService } from '../../core/cart.service';
+import { ProductCardComponent } from '../../shared/product-card/product-card.component';
+import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, ProductCardComponent, NotifBellComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
@@ -16,6 +18,8 @@ export class ProductListComponent implements OnInit {
   all: Product[] = [];
   results = signal<Product[]>([]);
   loading = signal(true);
+  loadError = signal(false);
+  inStockOnly = false;
 
   search = '';
   categoryId = '';
@@ -23,28 +27,41 @@ export class ProductListComponent implements OnInit {
 
   constructor(private products: ProductService, public cart: CartService, private route: ActivatedRoute) {}
 
+
   async ngOnInit() {
     const params = this.route.snapshot.queryParamMap;
     this.categoryId = params.get('category') || '';
     this.search = params.get('search') || '';
+    await this.load();
+  }
 
-    this.all = await this.products.getAll();
-    this.applyFilters();
+  async load() {
+    this.loading.set(true);
+    this.loadError.set(false);
+    try {
+      this.all = await this.products.getAll();
+      this.applyFilters();
+    } catch {
+      this.loadError.set(true);
+    }
     this.loading.set(false);
   }
 
   applyFilters() {
-    this.results.set(this.products.filterAndSort(this.all, {
+    let list = this.products.filterAndSort(this.all, {
       search: this.search, categoryId: this.categoryId, sort: this.sort
-    }));
+    });
+    if (this.inStockOnly) {
+      list = list.filter(p => p.variants.some(v => v.stock > 0));
+    }
+    this.results.set(list);
   }
 
-  addToCart(p: Product) {
-    const variant = p.variants[0];
-    this.cart.add({
-      productId: p.id, variantId: variant.id, quantity: 1,
-      product: { name: p.name, image: p.image, imageUrl: p.imageUrl },
-      variant: { unit: variant.unit, price: variant.price }
-    });
+  clearFilters() {
+    this.search = '';
+    this.categoryId = '';
+    this.sort = '';
+    this.inStockOnly = false;
+    this.applyFilters();
   }
 }

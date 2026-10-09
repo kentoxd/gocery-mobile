@@ -7,6 +7,8 @@ import { CartService } from '../../core/cart.service';
 import { WishlistService } from '../../core/wishlist.service';
 import { AuthService } from '../../core/auth.service';
 import { ReviewService, Review } from '../../core/review.service';
+import { ToastService } from '../../core/toast.service';
+import { MiniCartService } from '../../core/mini-cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -29,6 +31,8 @@ export class ProductDetailComponent implements OnInit {
   reviewComment = '';
   reviewSubmitting = signal(false);
   reviewError = signal('');
+  reviewFiles: File[] = [];
+  reviewPreviews = signal<string[]>([]);
   reviewGateStatus = signal<'checking' | 'eligible' | 'not-eligible' | 'already-reviewed' | 'logged-out'>('logged-out');
 
   constructor(
@@ -39,7 +43,9 @@ export class ProductDetailComponent implements OnInit {
     private wishlist: WishlistService,
     public auth: AuthService,
     private reviewsSvc: ReviewService,
-    private location: Location
+    private location: Location,
+    private toast: ToastService,
+    private mini: MiniCartService
   ) {}
 
   goBack() {
@@ -51,7 +57,8 @@ export class ProductDetailComponent implements OnInit {
     const p = await this.products.getById(id);
     if (!p) { this.router.navigate(['/shop']); return; }
     this.product.set(p);
-    this.selectedVariantId = p.variants[0]?.id || '';
+    const firstInStock = p.variants.find(v => v.stock > 0);
+    this.selectedVariantId = (firstInStock || p.variants[0])?.id || '';
     this.reviews.set(await this.reviewsSvc.getByProduct(id));
 
     const user = this.auth.currentUser();
@@ -82,15 +89,38 @@ export class ProductDetailComponent implements OnInit {
     return this.reviewsSvc.getAverageRating(this.reviews());
   }
 
+  get lowStockNote(): string {
+    const v = this.selectedVariant;
+    if (!v || v.stock <= 0 || v.stock > 10) return '';
+    return 'Only ' + v.stock + ' left';
+  }
+
+  onPhotosPicked(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const picked: File[] = [];
+    const files = input.files;
+    if (files) {
+      for (let i = 0; i < files.length && i < 3; i++) picked.push(files[i]);
+      if (files.length > 3) this.toast.show('Only the first 3 photos will be used.', 'error');
+    }
+    this.reviewFiles = picked;
+    const urls: string[] = [];
+    for (let i = 0; i < picked.length; i++) urls.push(URL.createObjectURL(picked[i]));
+    this.reviewPreviews.set(urls);
+  }
+
   addToCart() {
     const p = this.product();
     const v = this.selectedVariant;
-    if (!p || !v) return;
+    if (!p || !v || v.stock <= 0) return;
     this.cart.add({
       productId: p.id, variantId: v.id, quantity: this.quantity,
       product: { name: p.name, image: p.image, imageUrl: p.imageUrl },
       variant: { unit: v.unit, price: v.price }
     });
+    const message = 'Added ' + this.quantity + 'x ' + p.name + ' to your cart';
+    this.toast.show(message + '!');
+    this.mini.open(message);
   }
 
   async toggleWishlist() {
@@ -114,13 +144,16 @@ export class ProductDetailComponent implements OnInit {
       const result = await this.reviewsSvc.add({
         productId: p.id, userId: user.id, userName: user.name,
         rating: this.reviewRating, comment: this.reviewComment.trim()
-      });
+      }, this.reviewFiles);
       if (!result.success) {
         this.reviewError.set(result.error || 'Could not submit review.');
         return;
       }
       this.reviewComment = '';
       this.reviewRating = 5;
+      this.reviewFiles = [];
+      this.reviewPreviews.set([]);
+      this.toast.show('Review submitted. Thank you!');
       this.reviews.set(await this.reviewsSvc.getByProduct(p.id));
       this.reviewGateStatus.set('already-reviewed');
     } catch {

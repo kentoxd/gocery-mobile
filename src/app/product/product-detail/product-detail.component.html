@@ -19,10 +19,12 @@
     <label class="field-label">Unit</label>
     <select [(ngModel)]="selectedVariantId">
       @for (v of p.variants; track v.id) {
-        <option [value]="v.id">{{ v.unit }} — ₱{{ v.price.toFixed(2) }} ({{ v.stock }} available)</option>
+        <option [value]="v.id" [disabled]="v.stock <= 0">{{ v.unit }} — ₱{{ v.price.toFixed(2) }} ({{ v.stock > 0 ? v.stock + ' available' : 'sold out' }})</option>
       }
     </select>
   </div>
+
+  @if (lowStockNote) { <p class="low-stock">{{ lowStockNote }}</p> }
 
   <div class="qty-row">
     <label class="field-label">Quantity</label>
@@ -33,7 +35,9 @@
     </div>
   </div>
 
-  <button class="btn btn--primary" (click)="addToCart()">Add to Cart — ₱{{ (selectedVariant?.price || 0) * quantity | number:'1.2-2' }}</button>
+  <button class="btn btn--primary" [disabled]="!selectedVariant || selectedVariant.stock <= 0" (click)="addToCart()">
+    {{ selectedVariant && selectedVariant.stock <= 0 ? 'Sold out' : 'Add to Cart — ₱' + (((selectedVariant?.price || 0) * quantity) | number:'1.2-2') }}
+  </button>
 
   <hr>
 
@@ -45,6 +49,13 @@
       <div class="review">
         <strong>{{ r.userName }}</strong> — {{ '⭐'.repeat(r.rating) }}
         <p>{{ r.comment }}</p>
+        @if (r.images?.length) {
+          <div class="review-images">
+            @for (img of r.images; track img) {
+              <a [href]="img" target="_blank" rel="noopener"><img [src]="img" alt="Review photo" loading="lazy"></a>
+            }
+          </div>
+        }
         <small class="muted">{{ r.date }}</small>
       </div>
     }
@@ -80,7 +91,16 @@
           <label>Comment</label>
           <textarea [(ngModel)]="reviewComment" rows="3" placeholder="How was this product?"></textarea>
         </div>
-        @if (reviewError()) { <p class="form-error">{{ reviewError() }}</p> }
+        <div class="form-group">
+          <label for="review-photos">Add photos (optional, up to 3)</label>
+          <input id="review-photos" type="file" accept="image/*" multiple (change)="onPhotosPicked($event)">
+          @if (reviewPreviews().length) {
+            <div class="review-images">
+              @for (u of reviewPreviews(); track u) { <img [src]="u" alt="Photo preview"> }
+            </div>
+          }
+        </div>
+        @if (reviewError()) { <p class="form-error" role="alert">{{ reviewError() }}</p> }
         <button class="btn btn--primary" (click)="submitReview()" [disabled]="reviewSubmitting()">
           {{ reviewSubmitting() ? 'Submitting…' : 'Submit Review' }}
         </button>

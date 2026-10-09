@@ -9,9 +9,23 @@
       <p>Your cart is empty.</p>
       <a routerLink="/shop" class="btn btn--primary">Start Shopping</a>
     </div>
+    @if (popular().length) {
+      <h2 class="section-title">Popular right now</h2>
+      <div class="popular-grid">
+        @for (p of popular(); track p.id) {
+          <app-product-card [product]="p"></app-product-card>
+        }
+      </div>
+    }
   } @else {
+    <label class="check-row">
+      <input type="checkbox" [checked]="cart.allSelected()" (change)="onSelectAll($event)">
+      <span>Select all ({{ cart.cartItems().length }})</span>
+    </label>
+
     @for (item of cart.cartItems(); track item.productId + item.variantId) {
       <div class="card cart-item">
+        <input type="checkbox" class="cart-check" [checked]="cart.isSelected(item)" (change)="cart.toggleSelected(item)" [attr.aria-label]="'Select ' + item.product.name + ' for checkout'">
         <div class="cart-item__image">
           @if (item.product.imageUrl) { <img [src]="item.product.imageUrl" [alt]="item.product.name" loading="lazy"> } @else { <span>{{ item.product.image }}</span> }
         </div>
@@ -31,10 +45,20 @@
     }
 
     <div class="summary card">
-      <div class="row"><span>Subtotal</span><strong class="price">₱{{ cart.subtotal().toFixed(2) }}</strong></div>
+      <div class="row"><span>Subtotal ({{ cart.selectedCount() }} of {{ cart.cartItems().length }} selected)</span><strong class="price">₱{{ cart.selectedSubtotal().toFixed(2) }}</strong></div>
+      @if (cart.selectedCount()) {
+        @if (remaining > 0) {
+          <p class="ship-note">Add <strong>₱{{ remaining.toFixed(2) }}</strong> more for <strong>free delivery</strong></p>
+        } @else {
+          <p class="ship-note ship-note--ok">You qualify for free delivery!</p>
+        }
+        <div class="ship-bar"><div class="ship-bar__fill" [style.width.%]="progress"></div></div>
+      }
       <p class="muted" style="font-size:0.8rem">Delivery fee and any discounts are calculated at checkout.</p>
     </div>
 
-    <button class="btn btn--primary" (click)="goToCheckout()">Proceed to Checkout</button>
+    <button class="btn btn--primary" [disabled]="!cart.selectedCount()" (click)="goToCheckout()">
+      {{ cart.selectedCount() ? 'Checkout (' + cart.selectedCount() + ' item' + (cart.selectedCount() === 1 ? '' : 's') + ')' : 'Select items to checkout' }}
+    </button>
   }
 </div>

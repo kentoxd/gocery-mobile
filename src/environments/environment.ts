@@ -7,6 +7,8 @@
  */
 export const environment = {
   production: false,
+  // Same Cloudinary account/preset as the web app (js/config.js) - used for review photos and payment receipts.
+  cloudinary: { cloudName: 'irdmobtq', uploadPreset: 'gocery_receipts' },
   firebase: {
     apiKey: 'AIzaSyDmr7iIYX21BmJ1LzsGOzVpsfJp33DwTWc',
     authDomain: 'go--cery.firebaseapp.com',

@@ -1,6 +1,7 @@
 <div class="page">
   <div class="page-header">
     <h1>Shop</h1>
+    <app-notif-bell style="margin-left:auto"></app-notif-bell>
   </div>
 
   <div class="filters">
@@ -17,27 +18,38 @@
         <option value="name">Name A-Z</option>
       </select>
     </div>
+    <label class="in-stock-toggle">
+      <input type="checkbox" [(ngModel)]="inStockOnly" (ngModelChange)="applyFilters()"> In stock only
+    </label>
   </div>
 
   @if (loading()) {
-    <p class="muted">Loading…</p>
+    <div class="grid" aria-hidden="true">
+      @for (n of [1, 2, 3, 4]; track n) {
+        <div class="skeleton-card">
+          <div class="skeleton skeleton--image"></div>
+          <div class="skeleton skeleton--line"></div>
+          <div class="skeleton skeleton--line skeleton--short"></div>
+        </div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="empty-state">
+      <span class="empty-state__icon">⚠️</span>
+      <h2>We couldn't load the products</h2>
+      <p>Please check your connection and try again.</p>
+      <button class="btn btn--primary" (click)="load()">Try again</button>
+    </div>
   } @else if (!results().length) {
     <div class="empty-state">
       <span class="empty-state__icon">🔍</span>
-      <p>No products match your search.</p>
+      <p>No products match your search. Try a different word, or clear your filters.</p>
+      <button class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
     </div>
   } @else {
     <div class="grid">
       @for (p of results(); track p.id) {
-        <div class="card product-card">
-          <a [routerLink]="['/product', p.id]" class="product-card__image">
-            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
-          </a>
-          <a [routerLink]="['/product', p.id]" class="product-card__name"><strong>{{ p.name }}</strong></a>
-          <span class="product-card__unit">per {{ p.variants[0].unit }}</span>
-          <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
-          <button class="btn btn--primary" (click)="addToCart(p)">Add to Cart</button>
-        </div>
+        <app-product-card [product]="p"></app-product-card>
       }
     </div>
   }

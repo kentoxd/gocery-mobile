@@ -5,3 +5,5 @@
   border-radius: 999px; background: #fff;
 }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.in-stock-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; min-height: 44px; }
+.in-stock-toggle input { width: 20px; height: 20px; accent-color: var(--color-primary); }

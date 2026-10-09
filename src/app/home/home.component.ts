@@ -3,11 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ProductService, Product, CATEGORIES } from '../core/product.service';
 import { CartService } from '../core/cart.service';
+import { ProductCardComponent } from '../shared/product-card/product-card.component';
+import { NotifBellComponent } from '../shared/notif-bell/notif-bell.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, ProductCardComponent, NotifBellComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -27,27 +29,11 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit() {
     const all = await this.products.getAll();
-    this.featured.set(all.filter(p => p.featured).slice(0, 8));
+    // Best sellers first, then other featured products.
+    const best = all.filter(p => (p.tags || []).indexOf('best-seller') >= 0);
+    const featured = all.filter(p => p.featured && best.indexOf(p) < 0);
+    this.featured.set(best.concat(featured).slice(0, 8));
     this.loading.set(false);
-  }
-
-  qty(p: Product): number {
-    return this.quantities.get(p.id) ?? 1;
-  }
-
-  changeQty(p: Product, delta: number) {
-    const next = Math.max(1, this.qty(p) + delta);
-    this.quantities.set(p.id, next);
-  }
-
-  addToCart(p: Product) {
-    const variant = p.variants[0];
-    this.cart.add({
-      productId: p.id, variantId: variant.id, quantity: this.qty(p),
-      product: { name: p.name, image: p.image, imageUrl: p.imageUrl },
-      variant: { unit: variant.unit, price: variant.price }
-    });
-    this.quantities.set(p.id, 1);
   }
 
   scrollRail(direction: number) {

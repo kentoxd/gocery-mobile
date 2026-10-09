@@ -5,7 +5,7 @@
   <p class="muted" style="margin-bottom:1rem">See what our suki customers have to say.</p>
 
   @if (loading()) {
-    <p class="muted">Loading reviews…</p>
+    @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!reviews().length) {
     <div class="empty-state">
       <span class="empty-state__icon">★</span>
@@ -32,6 +32,13 @@
           <span class="review-card__rating">{{ '⭐'.repeat(r.rating) }}</span>
         </div>
         <p>{{ r.comment }}</p>
+        @if (r.images?.length) {
+          <div class="review-images">
+            @for (img of r.images; track img) {
+              <a [href]="img" target="_blank" rel="noopener"><img [src]="img" alt="Review photo" loading="lazy"></a>
+            }
+          </div>
+        }
         <small class="muted">{{ r.date }}{{ r.verified ? ' · Verified Purchase' : '' }}</small>
       </div>
     }

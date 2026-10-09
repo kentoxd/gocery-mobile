@@ -14,7 +14,7 @@
 
   <h2 class="section-title" style="margin-top:1rem">All Recipes</h2>
   @if (loading()) {
-    <p class="muted">Loading…</p>
+    @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!posts().length) {
     <div class="empty-state">
       <span class="empty-state__icon">🍲</span>
@@ -25,8 +25,8 @@
     @for (p of posts(); track p.id) {
       <div class="card recipe-row" (click)="view(p)">
         <div class="recipe-row__image">
-          @if (isImageUrl(p.image)) { <img [src]="optimize(p.image)" [alt]="p.title"> }
-          @else { <span>{{ p.image || '🍲' }}</span> }
+          @if (imageFor(p)) { <img [src]="imageFor(p)" [alt]="p.title" loading="lazy" (error)="imageFailed(p.id)"> }
+          @else { <span>{{ emojiFor(p) }}</span> }
         </div>
         <div class="recipe-row__body">
           <h3>{{ p.title }}</h3>
@@ -44,14 +44,68 @@
 
   @if (openPost(); as post) {
     <div class="modal-overlay" (click)="closeModal()">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
-        @if (isImageUrl(post.image)) { <img [src]="optimize(post.image)" [alt]="post.title" class="modal-sheet__image"> }
-        @else { <span class="modal-sheet__emoji">{{ post.image || '🍲' }}</span> }
+      <div class="modal-sheet" role="dialog" aria-modal="true" [attr.aria-label]="post.title" (click)="$event.stopPropagation()">
+        <div class="modal-sheet__hero">
+          @if (imageFor(post)) { <img [src]="imageFor(post)" [alt]="post.title" (error)="imageFailed(post.id)"> }
+          @else { <span class="modal-sheet__emoji">{{ emojiFor(post) }}</span> }
+        </div>
         @if (post.category) { <span class="tag">{{ post.category }}</span> }
         <h2>{{ post.title }}</h2>
         @if (post.date) { <p class="muted">{{ post.date }}</p> }
-        <p style="margin-top:0.75rem">{{ post.content }}</p>
-        <button class="btn btn--primary" style="margin-top:1rem" (click)="closeModal()">Close</button>
+
+        @if (post.prepTime || post.cookTime || post.servings || post.difficulty) {
+          <div class="meta">
+            @if (post.prepTime) { <div><small>Prep</small><strong>{{ post.prepTime }}</strong></div> }
+            @if (post.cookTime) { <div><small>Cook</small><strong>{{ post.cookTime }}</strong></div> }
+            @if (post.servings) { <div><small>Serves</small><strong>{{ post.servings }}</strong></div> }
+            @if (post.difficulty) { <div><small>Level</small><strong>{{ post.difficulty }}</strong></div> }
+          </div>
+        }
+
+        <p class="intro">{{ post.content }}</p>
+
+        @if (post.ingredients?.length) {
+          <h3 class="block-title">Ingredients</h3>
+          @for (ing of post.ingredients; track ing.name) {
+            <div class="ingredient">
+              <div class="ingredient__info">
+                <strong>{{ ing.name }}</strong>
+                <small class="muted">{{ ing.amount }}</small>
+              </div>
+              @if (match(ing); as m) {
+                <div class="ingredient__buy">
+                  <small class="muted">₱{{ ingredientPrice(ing).toFixed(2) }}</small>
+                  <button class="btn btn--outline btn--sm" [disabled]="!inStock(ing)" (click)="addIngredients([ing], ing.name, false)">
+                    {{ inStock(ing) ? 'Add' : 'Sold out' }}
+                  </button>
+                </div>
+              } @else {
+                <small class="muted">Pantry item</small>
+              }
+            </div>
+          }
+          @if (orderable(post).length) {
+            <button class="btn btn--primary order-all" (click)="addIngredients(orderable(post), post.title, true)">
+              Order ingredients ({{ orderable(post).length }} item{{ orderable(post).length === 1 ? '' : 's' }} · ₱{{ orderTotal(post).toFixed(2) }})
+            </button>
+          }
+        }
+
+        @if (post.steps?.length) {
+          <h3 class="block-title">{{ post.ingredients?.length ? 'Instructions' : 'Steps' }}</h3>
+          <ol class="steps-list">
+            @for (st of post.steps; track st) { <li>{{ st }}</li> }
+          </ol>
+        }
+
+        @if (post.tips?.length) {
+          <h3 class="block-title">Tips</h3>
+          <ul class="tips-list">
+            @for (t of post.tips; track t) { <li>{{ t }}</li> }
+          </ul>
+        }
+
+        <button class="btn btn--outline" style="margin-top:1rem" (click)="closeModal()">Close</button>
       </div>
     </div>
   }

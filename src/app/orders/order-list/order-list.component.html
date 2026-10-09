@@ -1,14 +1,16 @@
 <div class="page">
   <div class="page-header">
     <h1>My Orders</h1>
+    <app-notif-bell style="margin-left:auto"></app-notif-bell>
   </div>
 
   @if (loading()) {
-    <p class="muted">Loading…</p>
+    @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!orders().length) {
     <div class="empty-state">
       <span class="empty-state__icon">📦</span>
-      <p>No orders yet.</p>
+      <p>No orders yet. Your orders will show up here once you check out.</p>
+      <a routerLink="/shop" class="btn btn--primary">Start Shopping</a>
     </div>
   } @else {
     @for (o of orders(); track o.id) {
@@ -17,6 +19,7 @@
         <div class="list-row__body">
           <strong>Order {{ o.id.slice(0, 8) }}</strong>
           <p class="muted">{{ o.items.length }} item(s) — ₱{{ o.total.toFixed(2) }}</p>
+          <small class="muted">{{ paymentLabel(o) }}</small>
         </div>
         <span class="status-pill" [ngClass]="{
           'status-pill--positive': o.status === 'Confirmed' || o.status === 'Delivered',

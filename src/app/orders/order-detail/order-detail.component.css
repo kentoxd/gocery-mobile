@@ -7,3 +7,12 @@
 .summary-row { display: flex; justify-content: space-between; padding: 0.25rem 0; }
 .summary-row.total { font-weight: 700; color: var(--color-primary); }
 hr { margin: 0.5rem 0; border: none; border-top: 1px solid var(--color-border); }
+
+.status-msg { margin: 0 0 1rem; padding: 0.7rem 0.9rem; background: #f0fdf4; border-left: 4px solid var(--color-primary); border-radius: 6px; font-weight: 600; color: var(--color-primary-dark); font-size: 0.9rem; }
+.receipt-card { border: 2px solid var(--color-accent-dark); background: #fff7ed; margin-bottom: 1rem; }
+.receipt-alert { font-weight: 700; color: #9a3412; margin-bottom: 0.75rem; }
+.receipt-ok { color: var(--color-primary-dark); font-weight: 600; margin-bottom: 0.5rem; }
+.receipt-img { width: 100%; max-width: 280px; height: auto; border-radius: 8px; border: 1px solid var(--color-border); display: block; margin: 0.25rem 0 0.75rem; }
+.receipt-btn { cursor: pointer; }
+.receipt-btn.is-busy { opacity: 0.6; pointer-events: none; }
+.step-date { display: block; font-size: 0.62rem; color: var(--color-text-muted); }

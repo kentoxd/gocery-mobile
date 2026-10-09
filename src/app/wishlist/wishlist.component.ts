@@ -5,6 +5,7 @@ import { WishlistService } from '../core/wishlist.service';
 import { ProductService, Product } from '../core/product.service';
 import { CartService } from '../core/cart.service';
 import { AuthService } from '../core/auth.service';
+import { ToastService } from '../core/toast.service';
 
 @Component({
   selector: 'app-wishlist',
@@ -21,7 +22,8 @@ export class WishlistComponent implements OnInit {
     private wishlist: WishlistService,
     private productService: ProductService,
     public cart: CartService,
-    private auth: AuthService
+    private auth: AuthService,
+    private toast: ToastService
   ) {}
 
   async ngOnInit() {
@@ -41,7 +43,9 @@ export class WishlistComponent implements OnInit {
   }
 
   moveToCart(p: Product) {
-    const v = p.variants[0];
+    const v = p.variants.find(x => x.stock > 0);
+    if (!v) { this.toast.show('That item is sold out right now.', 'error'); return; }
+    this.toast.show('Added 1x ' + p.name + ' to your cart!');
     this.cart.add({
       productId: p.id, variantId: v.id, quantity: 1,
       product: { name: p.name, image: p.image, imageUrl: p.imageUrl },

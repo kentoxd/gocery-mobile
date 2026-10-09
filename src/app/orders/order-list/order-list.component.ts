@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { OrderService } from '../../core/order.service';
 import { AuthService } from '../../core/auth.service';
+import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
 
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, NotifBellComponent],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css'
 })
@@ -16,6 +17,13 @@ export class OrderListComponent implements OnInit {
   loading = signal(true);
 
   constructor(private orderService: OrderService, private auth: AuthService) {}
+
+  paymentLabel(o: any): string {
+    if (o.status === 'Cancelled') return 'Cancelled';
+    if (o.paymentStatus === 'paid') return 'Paid';
+    if (o.paymentStatus === 'awaiting_manual_verification') return o.receiptUrl ? 'Awaiting verification' : 'Receipt needed';
+    return 'Pay on delivery';
+  }
 
   async ngOnInit() {
     const user = this.auth.currentUser();

@@ -1,0 +1,38 @@
+@if (mini.visible()) {
+  <div class="mini-backdrop" (click)="mini.close()"></div>
+  <section class="mini-sheet" role="dialog" aria-modal="true" aria-label="Your cart">
+    <div class="mini-head">
+      <strong>✓ {{ mini.message() }}</strong>
+      <button class="mini-x" (click)="mini.close()" aria-label="Close">×</button>
+    </div>
+
+    @for (i of latestItems; track i.productId + i.variantId) {
+      <div class="mini-item">
+        <div class="mini-thumb">
+          @if (i.product.imageUrl) { <img [src]="i.product.imageUrl" [alt]="i.product.name"> } @else { <span>{{ i.product.image }}</span> }
+        </div>
+        <div class="mini-info">
+          <strong>{{ i.product.name }}</strong>
+          <small>{{ i.quantity }} × {{ i.variant.unit }}</small>
+        </div>
+        <span>₱{{ (i.variant.price * i.quantity).toFixed(2) }}</span>
+      </div>
+    }
+    @if (cart.cartItems().length > 3) {
+      <p class="mini-more">+ {{ cart.cartItems().length - 3 }} more item(s) in your cart</p>
+    }
+
+    <div class="mini-ship">
+      @if (remaining > 0) {
+        <p>Add <strong>₱{{ remaining.toFixed(2) }}</strong> more for <strong>free delivery</strong></p>
+      } @else {
+        <p class="mini-ship--ok">You qualify for free delivery!</p>
+      }
+      <div class="mini-bar"><div class="mini-bar__fill" [style.width.%]="progress"></div></div>
+    </div>
+
+    <div class="mini-row"><span>Subtotal</span><strong>₱{{ cart.subtotal().toFixed(2) }}</strong></div>
+    <a routerLink="/cart" class="btn btn--primary" (click)="mini.close()">View cart &amp; checkout</a>
+    <button class="btn btn--outline" style="margin-top:0.5rem" (click)="mini.close()">Keep shopping</button>
+  </section>
+}

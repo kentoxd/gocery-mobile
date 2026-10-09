@@ -6,12 +6,15 @@
     <a routerLink="/home" class="logo-link" aria-label="Go! Cery home">
       <img class="logo-img" src="https://res.cloudinary.com/m0uovtom/image/upload/f_auto,q_auto/v1787825182/GOCERY_LOGO.png" width="52" height="44" alt="Go! Cery">
     </a>
-    <a routerLink="/cart" class="icon-btn icon-btn--cart" aria-label="View cart">
-      🛒 Cart
-      @if (cart.itemCount() > 0) {
-        <span class="badge">{{ cart.itemCount() }}</span>
-      }
-    </a>
+    <div class="topbar__right">
+      <app-notif-bell></app-notif-bell>
+      <a routerLink="/cart" class="icon-btn icon-btn--cart" aria-label="View cart">
+        🛒 Cart
+        @if (cart.itemCount() > 0) {
+          <span class="badge">{{ cart.itemCount() }}</span>
+        }
+      </a>
+    </div>
   </header>
 
   <!-- Slide-out menu -->
@@ -46,6 +49,11 @@
     <div class="hero-banner__text">
       <h1>Palengke-Fresh, Delivered Tomorrow</h1>
       <p>Fresh produce, seafood & meat — straight to your door.</p>
+      <ul class="hero-perks">
+        <li>Order before 7:30 PM for next-day delivery</li>
+        <li>Free delivery on orders ₱4,000+</li>
+        <li>Palengke-fresh guarantee</li>
+      </ul>
       <div class="hero-banner__actions">
         <a routerLink="/shop" class="btn btn--accent btn--pill">Shop Now</a>
         <a routerLink="/support" class="btn btn--outline btn--pill">Learn More</a>
@@ -58,7 +66,15 @@
     <h2 class="section__title">Best Sellers</h2>
 
     @if (loading()) {
-      <p class="muted">Loading…</p>
+      <div class="rail">
+        @for (n of [1, 2, 3]; track n) {
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton skeleton--image"></div>
+            <div class="skeleton skeleton--line"></div>
+            <div class="skeleton skeleton--line skeleton--short"></div>
+          </div>
+        }
+      </div>
     } @else if (!featured().length) {
       <p class="muted">No featured products yet.</p>
     } @else {
@@ -67,22 +83,7 @@
 
         <div class="rail" #rail>
           @for (p of featured(); track p.id) {
-            <div class="card product-card">
-              <a [routerLink]="['/product', p.id]" class="product-card__image">
-                @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
-              </a>
-              <a [routerLink]="['/product', p.id]" class="product-card__name"><strong>{{ p.name }}</strong></a>
-              <span class="product-card__unit">per {{ p.variants[0].unit }}</span>
-              <span class="price">₱{{ p.variants[0].price.toFixed(2) }}</span>
-
-              <div class="stepper">
-                <button (click)="changeQty(p, -1)" aria-label="Decrease quantity">−</button>
-                <span>{{ qty(p) }}</span>
-                <button (click)="changeQty(p, 1)" aria-label="Increase quantity">+</button>
-              </div>
-
-              <button class="btn btn--primary" (click)="addToCart(p)">Add to Cart</button>
-            </div>
+            <app-product-card [product]="p" [showQty]="true"></app-product-card>
           }
         </div>
 

@@ -9,3 +9,9 @@
 .remove-btn { width: auto; background: none; border: none; color: #c0392b; font-size: 0.8rem; font-weight: 600; }
 .summary { margin: 1rem 0; }
 .row { display: flex; justify-content: space-between; align-items: center; }
+.cart-item { align-items: center; }
+.ship-note { font-size: 0.85rem; margin-top: 0.5rem; }
+.ship-note--ok { color: var(--color-primary); font-weight: 700; }
+.ship-bar { height: 8px; background: var(--color-border); border-radius: 999px; overflow: hidden; margin-top: 0.4rem; }
+.ship-bar__fill { height: 100%; background: var(--color-primary); border-radius: 999px; transition: width .3s ease; }
+.popular-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }

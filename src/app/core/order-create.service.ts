@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { collection, doc, getDoc, runTransaction } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
+import { ProductService } from './product.service';
 import { ZONES, FREE_DELIVERY_THRESHOLD, VIP_FREE_SHIPPING_THRESHOLD, PROMO_CODES } from './pricing.config';
 
 export interface CreateOrderInput {
@@ -35,7 +36,7 @@ export class OrderCreateError extends Error {}
  */
 @Injectable({ providedIn: 'root' })
 export class OrderCreateService {
-  constructor(private fb: FirebaseService, private auth: AuthService) {}
+  constructor(private fb: FirebaseService, private auth: AuthService, private products: ProductService) {}
 
   async createOrder(input: CreateOrderInput): Promise<{ id: string; total: number }> {
     const user = this.auth.currentUser();
@@ -60,7 +61,7 @@ export class OrderCreateService {
 
     const orderRef = doc(collection(this.fb.db, 'orders'));
 
-    return runTransaction(this.fb.db, async (tx) => {
+    const created = await runTransaction(this.fb.db, async (tx) => {
       // --- Read every product doc first (Firestore transactions require
       // all reads before any writes). ---
       const productRefs = input.items.map(i => doc(this.fb.db, 'products', i.productId));
@@ -149,5 +150,7 @@ export class OrderCreateService {
 
       return { id: orderRef.id, total };
     });
+    this.products.clearCache();
+    return created;
   }
 }
