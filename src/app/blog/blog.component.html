@@ -13,6 +13,16 @@
   }
 
   <h2 class="section-title" style="margin-top:1rem">All Recipes</h2>
+  @if (!loading() && posts().length) {
+    <input type="search" class="recipe-search" placeholder="Search recipes or ingredients…" aria-label="Search recipes"
+           [ngModel]="searchText()" (ngModelChange)="searchText.set($event)">
+    <div class="chips">
+      <button class="chip" [class.chip--active]="category() === ''" (click)="category.set('')">All</button>
+      @for (c of categories; track c) {
+        <button class="chip" [class.chip--active]="category() === c" (click)="category.set(c)">{{ c }}</button>
+      }
+    </div>
+  }
   @if (loading()) {
     @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!posts().length) {
@@ -21,8 +31,14 @@
       <h2>No recipes yet</h2>
       <p class="muted">Check back soon for new ideas.</p>
     </div>
+  } @else if (!visiblePosts.length) {
+    <div class="empty-state">
+      <span class="empty-state__icon">🔍</span>
+      <p>No recipes match your search.</p>
+      <button class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
+    </div>
   } @else {
-    @for (p of posts(); track p.id) {
+    @for (p of visiblePosts; track p.id) {
       <div class="card recipe-row" (click)="view(p)">
         <div class="recipe-row__image">
           @if (imageFor(p)) { <img [src]="imageFor(p)" [alt]="p.title" loading="lazy" (error)="imageFailed(p.id)"> }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { SEED_RECIPES } from './recipes-seed';
 
@@ -27,6 +27,8 @@ export interface RecipePost {
   ingredients?: RecipeIngredient[];
   steps?: string[];
   tips?: string[];
+  /** 'published' recipes are shown to customers; 'draft' ones are hidden. */
+  status?: string;
 }
 
 export interface FaqItem { q: string; a: string; }
@@ -50,9 +52,30 @@ export class CmsService {
     return this._cms;
   }
 
+  private _recipes: { time: number; data: RecipePost[] } | null = null;
+
+  /**
+   * Recipes live in their own Firestore collection (one document each, set up from the admin page).
+   * Until the admin opens Recipes for the first time, the old list in cms/main (or the seed data) is used.
+   */
   async getRecipes(): Promise<RecipePost[]> {
+    if (this._recipes && Date.now() - this._recipes.time < 60000) return this._recipes.data;
     const cms = await this._getCms();
-    return (cms.recipes && cms.recipes.length) ? cms.recipes : SEED_RECIPES;
+    let list: RecipePost[] | null = null;
+    try {
+      const snap = await getDocs(query(collection(this.fb.db, 'recipes'), where('status', '==', 'published')));
+      if (!snap.empty || cms.recipesMigrated) {
+        list = snap.docs.map(d => ({ id: d.id, ...d.data() } as RecipePost));
+        list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+      }
+    } catch {
+      list = null; // collection not available yet (rules not deployed): use the old list
+    }
+    if (list === null) {
+      list = (cms.recipes && cms.recipes.length) ? cms.recipes : SEED_RECIPES;
+    }
+    this._recipes = { time: Date.now(), data: list! };
+    return list!;
   }
 
   async getFaq(): Promise<FaqItem[]> {
