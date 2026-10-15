@@ -1,6 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { CmsService, RecipePost, RecipeIngredient } from '../core/cms.service';
 import { ProductService, Product, Variant } from '../core/product.service';
 import { CartService } from '../core/cart.service';
@@ -14,7 +13,7 @@ const FAVORITES_KEY = 'gocery_recipe_favorites';
 @Component({
   selector: 'app-blog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './blog.component.html',
   styleUrl: './blog.component.css'
 })
@@ -23,8 +22,6 @@ export class BlogComponent implements OnInit {
   favoriteIds = signal<string[]>(this._loadFavorites());
   openPost = signal<RecipePost | null>(null);
   loading = signal(true);
-  searchText = signal('');
-  category = signal('');
   failedImages = signal<string[]>([]);
   private products = new Map<string, Product>();
 
@@ -35,42 +32,6 @@ export class BlogComponent implements OnInit {
     private toast: ToastService,
     private mini: MiniCartService
   ) {}
-
-  /** Category names found in the recipes, for the filter chips. */
-  get categories(): string[] {
-    const names: string[] = [];
-    const all = this.posts();
-    for (let i = 0; i < all.length; i++) {
-      const c = all[i].category || 'Recipes';
-      if (names.indexOf(c) < 0) names.push(c);
-    }
-    return names;
-  }
-
-  /** Recipes that match the search box and the chosen category. */
-  get visiblePosts(): RecipePost[] {
-    const words = this.searchText().trim().toLowerCase();
-    const chosen = this.category();
-    const list: RecipePost[] = [];
-    const all = this.posts();
-    for (let i = 0; i < all.length; i++) {
-      const p = all[i];
-      if (chosen && (p.category || 'Recipes') !== chosen) continue;
-      if (words) {
-        let text = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.category || '')).toLowerCase();
-        const ings = p.ingredients || [];
-        for (let j = 0; j < ings.length; j++) text += ' ' + String(ings[j].name).toLowerCase();
-        if (text.indexOf(words) < 0) continue;
-      }
-      list.push(p);
-    }
-    return list;
-  }
-
-  clearFilters() {
-    this.searchText.set('');
-    this.category.set('');
-  }
 
   async ngOnInit() {
     const [recipes, all] = await Promise.all([this.cms.getRecipes(), this.productService.getAll().catch(() => [] as Product[])]);
