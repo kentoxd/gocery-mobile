@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,18 +7,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#2f6d4f">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!--
-    Mapbox GL JS is loaded as a plain script + stylesheet (copied into
-    assets/mapbox-gl at build time from node_modules — see angular.json),
-    the same way the web app loads it. Importing it as a JS module instead
-    hits a known Angular dev-server (Vite) bundling bug with this package
-    ("__async is not defined"), so it's kept out of the module graph
-    entirely; the checkout location-picker reads it off `window.mapboxgl`.
-  -->
+
   <link rel="stylesheet" href="assets/mapbox-gl/mapbox-gl.css">
   <script src="assets/mapbox-gl/mapbox-gl.js"></script>
+
+  <style>
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      color: #2f6d4f;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      transition: opacity 0.4s ease;
+    }
+
+    #splash-screen img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      animation: splash-pop 0.8s ease-out;
+    }
+
+    #splash-screen h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 1rem 0 0.4rem;
+    }
+
+    #splash-screen p {
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    #splash-screen .loader {
+      width: 30px;
+      height: 30px;
+      margin-top: 1.5rem;
+      border: 3px solid #bbf7d0;
+      border-top-color: #2f6d4f;
+      border-radius: 50%;
+      animation: splash-spin 0.8s linear infinite;
+    }
+
+    @keyframes splash-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes splash-pop {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
+
 <body>
+  <div id="splash-screen">
+    <img src="https://res.cloudinary.com/m0uovtom/image/upload/f_auto,q_auto/v1787825182/GOCERY_LOGO.png" alt="Go! Cery logo">
+    <h1>Go! Cery</h1>
+    <p>Freshness delivered to your door.</p>
+    <div class="loader"></div>
+  </div>
+
   <app-root></app-root>
 </body>
+
 </html>
