@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
   search = '';
   quantities = new Map<string, number>();
 
-  categories = CATEGORIES.slice(0, 4);
+  categories = CATEGORIES.slice(0, 6);
 
   constructor(private products: ProductService, public cart: CartService, private router: Router) {}
 

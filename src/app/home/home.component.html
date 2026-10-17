@@ -45,7 +45,6 @@
 
   <!-- Hero banner -->
   <section class="hero-banner">
-    <div class="hero-banner__decor" aria-hidden="true">🥬🍊🍅🍆</div>
     <div class="hero-banner__text">
       <h1>Palengke-Fresh, Delivered Tomorrow</h1>
       <p>Fresh produce, seafood & meat — straight to your door.</p>
@@ -98,7 +97,7 @@
     <div class="category-grid">
       @for (c of categories; track c.id) {
         <button class="category-tile" (click)="goToCategory(c.id)">
-          <span class="category-tile__icon">{{ c.icon }}</span>
+          <img class="category-tile__icon" [src]="c.icon" [alt]="c.name">
           <span class="category-tile__name">{{ c.name }}</span>
         </button>
       }

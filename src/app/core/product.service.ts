@@ -6,12 +6,12 @@ import { optimizeImageUrl } from './image-url.util';
 export interface Category { id: string; name: string; icon: string; }
 
 export const CATEGORIES: Category[] = [
-  { id: 'fruits', name: 'Fruits', icon: '🍎' },
-  { id: 'vegetables', name: 'Vegetables', icon: '🥬' },
-  { id: 'herbs-spices', name: 'Herbs & Spices', icon: '🌿' },
-  { id: 'seafood', name: 'Fresh Seafood', icon: '🐟' },
-  { id: 'meat', name: 'Fresh Meat', icon: '🥩' },
-  { id: 'eggs-dairy', name: 'Eggs & Dairy', icon: '🥚' }
+  { id: 'fruits', name: 'Fruits', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1788000264/fru.png' },
+  { id: 'vegetables', name: 'Vegetables', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1788000264/veg.png' },
+  { id: 'herbs-spices', name: 'Herbs & Spices', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1792247188/herb.png' },
+  { id: 'seafood', name: 'Fresh Seafood', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1788000264/sea.png' },
+  { id: 'meat', name: 'Fresh Meat', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1788000264/meat.png' },
+  { id: 'eggs-dairy', name: 'Eggs & Dairy', icon: 'https://res.cloudinary.com/m0uovtom/image/upload/v1792248206/dely.png' }
 ];
 
 export interface Variant { id: string; unit: string; price: number; stock: number; }
