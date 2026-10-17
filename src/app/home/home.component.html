@@ -22,6 +22,12 @@
     <div class="menu-overlay" (click)="closeMenu()">
       <nav class="menu-panel" (click)="$event.stopPropagation()">
         <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          <span>🛒</span>Cart
+          @if (cart.itemCount() > 0) {
+          <span class="badge">{{ cart.itemCount() }}</span>
+          }
+        </a>
         <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
         <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
         <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>

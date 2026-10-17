@@ -1,8 +1,28 @@
 <div class="page">
   <div class="page-header">
+    <button class="icon-btn" (click)="toggleMenu()" aria-label="Open menu">☰ Menu</button>
     <h1>Your Cart</h1>
   </div>
-
+@if (menuOpen()) {
+    <div class="menu-overlay" (click)="closeMenu()">
+      <nav class="menu-panel" (click)="$event.stopPropagation()">
+        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          <span>🛒</span>Cart
+          @if (cart.itemCount() > 0) {
+          <span class="badge">{{ cart.itemCount() }}</span>
+          }
+        </a>
+        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
+        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
+        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
+        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
+        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
+        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
+        <button class="menu-close" (click)="closeMenu()">Close</button>
+      </nav>
+    </div>
+  }
   @if (!cart.cartItems().length) {
     <div class="empty-state">
       <span class="empty-state__icon">🛒</span>

@@ -1,9 +1,29 @@
 <div class="page">
   <div class="page-header">
+    <button class="icon-btn" (click)="toggleMenu()" aria-label="Open menu">☰ Menu</button>
     <h1>Shop</h1>
     <app-notif-bell style="margin-left:auto"></app-notif-bell>
   </div>
-
+  @if (menuOpen()) {
+    <div class="menu-overlay" (click)="closeMenu()">
+      <nav class="menu-panel" (click)="$event.stopPropagation()">
+        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          <span>🛒</span>Cart
+          @if (cart.itemCount() > 0) {
+          <span class="badge">{{ cart.itemCount() }}</span>
+          }
+        </a>
+        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
+        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
+        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
+        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
+        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
+        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
+        <button class="menu-close" (click)="closeMenu()">Close</button>
+      </nav>
+    </div>
+  }
   <div class="filters">
     <input class="input-pill" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
     <div class="filter-row">

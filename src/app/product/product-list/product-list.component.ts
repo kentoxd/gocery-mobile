@@ -20,6 +20,7 @@ export class ProductListComponent implements OnInit {
   loading = signal(true);
   loadError = signal(false);
   inStockOnly = false;
+  menuOpen = signal(false);
 
   search = '';
   categoryId = '';
@@ -63,5 +64,11 @@ export class ProductListComponent implements OnInit {
     this.sort = '';
     this.inStockOnly = false;
     this.applyFilters();
+  }
+    closeMenu() {
+    this.menuOpen.set(false);
+  }
+    toggleMenu() {
+    this.menuOpen.update(v => !v);
   }
 }

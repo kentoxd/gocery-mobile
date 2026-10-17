@@ -18,6 +18,7 @@ import { ProductCardComponent } from '../shared/product-card/product-card.compon
 export class CartComponent implements OnInit {
   popular = signal<Product[]>([]);
   threshold = FREE_DELIVERY_THRESHOLD;
+  menuOpen = signal(false);
 
   constructor(
     public cart: CartService,
@@ -62,5 +63,11 @@ export class CartComponent implements OnInit {
       return;
     }
     this.router.navigate(['/checkout']);
+  }
+      closeMenu() {
+    this.menuOpen.set(false);
+  }
+    toggleMenu() {
+    this.menuOpen.update(v => !v);
   }
 }
