@@ -6,3 +6,9 @@
 }
 .profile-info { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
 .profile-info--edit { gap: 0; }
+.btn--sm {
+  width: fit-content;
+  padding: 2px 16px;
+  font-size: 12px;
+  display: inline-block;
+}
