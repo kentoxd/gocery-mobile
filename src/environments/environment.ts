@@ -11,6 +11,9 @@ export const environment = {
   // Go! Cery payment server (server/ folder of the web project). Same URL as js/config.js apiBaseUrl.
   // Leave empty to hide online PayMongo methods (card, GCash/Maya online, QR Ph).
   apiBaseUrl: 'https://go-cery.onrender.com',
+  // Public website PayMongo can redirect to after GCash/Maya/3DS. Capacitor and
+  // http://localhost are not reachable from PayMongo's browser.
+  publicAppUrl: 'https://go--cery.firebaseapp.com',
   cloudinary: { cloudName: 'irdmobtq', uploadPreset: 'gocery_receipts' },
   firebase: {
     apiKey: 'AIzaSyDmr7iIYX21BmJ1LzsGOzVpsfJp33DwTWc',

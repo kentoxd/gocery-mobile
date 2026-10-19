@@ -86,7 +86,7 @@ export class PaymentService {
     if (!method.ok) return { success: false, error: method.message };
 
     // After 3D Secure the bank sends the customer back to this order screen.
-    const returnUrl = window.location.origin + '/orders/' + encodeURIComponent(orderId) + '?pm=return';
+    const returnUrl = this.paymentReturnUrl(orderId);
     const attached = await this.paymongo('/payment_intents/' + info.paymentIntentId + '/attach', info.publicKey, {
       payment_method: method.data.id, client_key: info.clientKey, return_url: returnUrl
     });
@@ -104,8 +104,23 @@ export class PaymentService {
 
   /** GCash / Maya: server returns a PayMongo redirect URL for the customer to approve payment. */
   startEwallet(orderId: string) {
-    const returnUrl = window.location.origin + '/orders/' + encodeURIComponent(orderId) + '?pm=return';
+    const returnUrl = this.paymentReturnUrl(orderId);
     return this.server('POST', '/api/payments/ewallet', { orderId, returnUrl });
+  }
+
+  /**
+   * PayMongo finishes in a real browser tab. Capacitor's http://localhost (no port)
+   * and capacitor:// origins are not websites, so Authorize would land on
+   * "This site can't be reached". Send them to the live site's order page instead
+   * (vanilla hosting uses orders.html, not the Ionic /orders/:id route).
+   */
+  private paymentReturnUrl(orderId: string): string {
+    const host = window.location.hostname;
+    const notPublic = host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'capacitor:';
+    if (notPublic && environment.publicAppUrl) {
+      return environment.publicAppUrl.replace(/\/$/, '') + '/orders.html?id=' + encodeURIComponent(orderId) + '&pm=return';
+    }
+    return window.location.origin + '/orders/' + encodeURIComponent(orderId) + '?pm=return';
   }
 
   startQr(orderId: string) {

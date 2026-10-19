@@ -8,6 +8,7 @@ export const environment = {
   // Same Cloudinary account/preset as the web app (js/config.js) - used for review photos and payment receipts.
   // Go! Cery payment server (server/ folder of the web project). Same URL as js/config.js apiBaseUrl.
   apiBaseUrl: 'https://go-cery.onrender.com',
+  publicAppUrl: 'https://go--cery.firebaseapp.com',
   cloudinary: { cloudName: 'irdmobtq', uploadPreset: 'gocery_receipts' },
   firebase: {
     apiKey: 'AIzaSyDmr7iIYX21BmJ1LzsGOzVpsfJp33DwTWc',

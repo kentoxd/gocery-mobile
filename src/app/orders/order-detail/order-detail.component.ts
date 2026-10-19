@@ -65,8 +65,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       const user = this.auth.currentUser();
       this.card.name = (user && user.name) || '';
       this.payMode.set((await this.pay.getConfig()).mode || '');
-      // Coming back from the 3D Secure page: check if the payment went through.
-      if (this.route.snapshot.queryParamMap.get('pm') === 'return') {
+      // Coming back from PayMongo (we send pm=return; PayMongo also appends payment_intent_id).
+      const q = this.route.snapshot.queryParamMap;
+      if (q.get('pm') === 'return' || q.get('payment_intent_id')) {
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
         this.paying.set(true);
         await this.waitForPayment(8, false);
