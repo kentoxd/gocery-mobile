@@ -21,7 +21,7 @@
             <p class="price">₱{{ p.variants[0].price.toFixed(2) }}</p>
           </div>
         </a>
-        <button type="button" class="btn btn--primary btn--sm" (click)="addToCart(p)">Add to Cart</button>
+        <button type="button" class="btn btn--primary btn--sm" (click)="moveToCart(p)">Add to Cart</button>
         <button type="button" class="remove-btn" (click)="remove(p.id)">Remove</button>
       </div>
     }

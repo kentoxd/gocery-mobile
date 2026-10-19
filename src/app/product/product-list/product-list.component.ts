@@ -6,6 +6,7 @@ import { CartService } from '../../core/cart.service';
 import { AuthService } from '../../core/auth.service';
 import { ProductCardComponent } from '../../shared/product-card/product-card.component';
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { NavIconComponent } from '../../shared/nav-icon/nav-icon.component';
 
 @Component({
   selector: 'app-product-list',

@@ -6,11 +6,13 @@ import { ProductService, Product } from '../core/product.service';
 import { CartService } from '../core/cart.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
+import { NavIconComponent } from '../shared/nav-icon/nav-icon.component';
 
 @Component({
   selector: 'app-wishlist',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent, NavIconComponent],
   templateUrl: './wishlist.component.html',
   styleUrl: './wishlist.component.css'
 })
