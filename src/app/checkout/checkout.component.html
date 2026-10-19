@@ -132,6 +132,9 @@
           <input type="radio" name="payment" [value]="m.id" [(ngModel)]="paymentMethod"> {{ m.icon }} {{ m.name }}
         </label>
       }
+      @if (paymentMethod === 'card' || paymentMethod === 'gcash_online' || paymentMethod === 'maya_online' || paymentMethod === 'qrph') {
+        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">You will pay on the next screen, right after you place the order.</p>
+      }
       @if (paymentMethod === 'gcash' || paymentMethod === 'maya') {
         <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ paymentMethod === 'gcash' ? 'GCash' : 'Maya' }} payments are verified manually by the seller after you scan their QR code.</p>
       }

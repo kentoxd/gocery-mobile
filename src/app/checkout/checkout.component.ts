@@ -8,13 +8,21 @@ import { OrderCreateService, OrderCreateError } from '../core/order-create.servi
 import { PsgcService, PsgcNode } from '../core/psgc.service';
 import { CmsService } from '../core/cms.service';
 import { ZONES, SLOTS, PROMO_CODES, FREE_DELIVERY_THRESHOLD } from '../core/pricing.config';
+import { environment } from '../../environments/environment';
 import { LocationPickerComponent, PickedLocation } from './location-picker/location-picker.component';
 
-const PAYMENT_METHODS = [
-  { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
-  { id: 'gcash', name: 'GCash', icon: '📱' },
-  { id: 'maya', name: 'Maya', icon: '💳' }
+const ALL_PAYMENT_METHODS = [
+  { id: 'cod', name: 'Cash on Delivery', icon: '💵', online: false },
+  { id: 'gcash', name: 'GCash', icon: '📱', online: false },
+  { id: 'maya', name: 'Maya', icon: '💳', online: false },
+  // Paid online through PayMongo. Only offered when environment.apiBaseUrl is set.
+  { id: 'card', name: 'Credit / Debit Card', icon: '💳', online: true },
+  { id: 'gcash_online', name: 'GCash (Online)', icon: '📱', online: true },
+  { id: 'maya_online', name: 'Maya (Online)', icon: '💳', online: true }
+  // QR Ph is ready in the code but hidden until PayMongo enables it for your account.
+  // To turn it on, add: { id: 'qrph', name: 'QR Ph', icon: '🔳', online: true }
 ];
+const PAYMENT_METHODS = ALL_PAYMENT_METHODS.filter(m => !m.online || !!environment.apiBaseUrl);
 
 function isManualQrPayment(method: string): boolean {
   return method === 'gcash' || method === 'maya';
@@ -256,6 +264,13 @@ export class CheckoutComponent implements OnInit {
     if (this.paymentMethod === 'cod') {
       this.cart.removePaidItems();
       this.router.navigate(['/orders', order.id]);
+      return;
+    }
+
+    // Card and QR Ph are paid on the order screen, right after the order is placed.
+    if (method && method.online) {
+      this.cart.removePaidItems();
+      this.router.navigate(['/orders', order.id], { queryParams: { pay: 1 } });
       return;
     }
 
