@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ProductService, Product, CATEGORIES } from '../../core/product.service';
 import { CartService } from '../../core/cart.service';
+import { AuthService } from '../../core/auth.service';
 import { ProductCardComponent } from '../../shared/product-card/product-card.component';
 import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
 
@@ -26,7 +27,7 @@ export class ProductListComponent implements OnInit {
   categoryId = '';
   sort = '';
 
-  constructor(private products: ProductService, public cart: CartService, private route: ActivatedRoute) {}
+  constructor(private products: ProductService, public cart: CartService, private route: ActivatedRoute, public auth: AuthService) {}
 
 
   async ngOnInit() {
