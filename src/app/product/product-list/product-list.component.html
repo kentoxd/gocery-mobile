@@ -59,8 +59,6 @@
     </nav>
   </div>
 }
-  <app-page-header title="Shop"></app-page-header>
-
   <div class="filters">
     <input class="input-pill" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
     <div class="filter-row">
@@ -92,16 +90,16 @@
     </div>
   } @else if (loadError()) {
     <div class="empty-state">
-      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="alert" size="lg" /></div>
+      <span class="empty-state__icon">⚠️</span>
       <h2>We couldn't load the products</h2>
       <p>Please check your connection and try again.</p>
-      <button type="button" class="btn btn--primary" (click)="load()">Try again</button>
+      <button class="btn btn--primary" (click)="load()">Try again</button>
     </div>
   } @else if (!results().length) {
     <div class="empty-state">
-      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="search" size="lg" /></div>
+      <span class="empty-state__icon">🔍</span>
       <p>No products match your search. Try a different word, or clear your filters.</p>
-      <button type="button" class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
+      <button class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
     </div>
   } @else {
     <div class="grid">

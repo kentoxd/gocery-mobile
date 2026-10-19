@@ -6,8 +6,6 @@
 export const environment = {
   production: true,
   // Same Cloudinary account/preset as the web app (js/config.js) - used for review photos and payment receipts.
-  // Go! Cery payment server (server/ folder of the web project). Same URL as js/config.js apiBaseUrl.
-  apiBaseUrl: 'https://go-cery.onrender.com',
   cloudinary: { cloudName: 'irdmobtq', uploadPreset: 'gocery_receipts' },
   firebase: {
     apiKey: 'AIzaSyDmr7iIYX21BmJ1LzsGOzVpsfJp33DwTWc',
@@ -20,13 +18,6 @@ export const environment = {
   // Same EmailJS project as the web app (js/config.emailjs.js) — sends the
   // registration OTP email. Template variables: {{email}} {{user_name}}
   // {{passcode}} {{time}} {{message}}.
-  // Order status emails. All three values must come from the SAME EmailJS account (see EMAIL.md).
-  // Keep YOUR_SERVICE_ID until you add your service. No order emails are sent until then.
-  orderEmail: {
-    serviceId: 'YOUR_SERVICE_ID',
-    publicKey: 'gZqfjAQFRdIkihxHU',
-    templateId: 'template_eym6quh'
-  },
   emailjs: {
     serviceId: 'service_x016mmu',
     templateId: 'template_uos5tae',

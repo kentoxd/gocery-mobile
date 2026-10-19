@@ -6,67 +6,6 @@
 
   <p class="status-msg">{{ statusMessage }}</p>
 
-  @if (needsPayment) {
-    <div class="card pay-card">
-      @if (!pay.enabled) {
-        <p class="form-error">Online payment is not available right now. Please contact the seller.</p>
-      } @else {
-        <p class="receipt-alert" role="alert">Action needed: pay ₱{{ o.total.toFixed(2) }} to confirm this order.</p>
-        @if (o.paymentStatus === 'failed') {
-          <p class="form-error">Your last payment did not go through{{ o.paymentFailureReason ? ': ' + o.paymentFailureReason : '' }}. You can try again.</p>
-        }
-
-        @if (isGcash) {
-          <h3 class="pay-title">Pay with {{ walletName }}</h3>
-          <p class="muted" style="font-size:0.85rem">You will be taken to PayMongo to approve the payment in your {{ walletName }} account, then brought back here.</p>
-          @if (payMode() === 'test') {
-            <p class="pay-test-note">Test mode: PayMongo will show a test page. Choose <strong>Authorize</strong> to simulate a successful payment, or <strong>Fail</strong> to simulate a failed one. No real money is charged.</p>
-          }
-          <button class="btn btn--primary" [disabled]="paying()" (click)="payByGcash()">
-            {{ paying() ? 'Opening ' + walletName + '…' : 'Pay ₱' + o.total.toFixed(2) + ' with ' + walletName }}
-          </button>
-        } @else if (isQr) {
-          <h3 class="pay-title">Pay with QR Ph</h3>
-          <p class="muted" style="font-size:0.85rem">Works with GCash, Maya, GoTyme, and most banking apps.</p>
-          <button class="btn btn--primary" [disabled]="paying()" (click)="showQr()">
-            {{ paying() ? 'Creating QR code…' : (qrImage() ? 'Show a new QR code' : 'Show my QR code') }}
-          </button>
-          @if (qrImage()) {
-            <div style="text-align:center;margin:1rem 0">
-              <img class="pay-qr" [src]="qrImage()" alt="QR Ph code">
-              <p><strong>₱{{ o.total.toFixed(2) }}</strong></p>
-              <p class="muted" style="font-size:0.85rem">Scan it in your banking or e-wallet app. This code works once and expires in 30 minutes.</p>
-              <p style="font-size:0.85rem">Waiting for your payment…</p>
-            </div>
-            @if (qrTestUrl()) {
-              <p class="pay-test-note">Test mode: do not scan this code with a real app. Use <a [href]="qrTestUrl()" target="_blank" rel="noopener">this PayMongo link</a> to simulate the payment instead.</p>
-            }
-          }
-        } @else {
-          <h3 class="pay-title">Pay with card</h3>
-          @if (payMode() === 'test') {
-            <p class="pay-test-note">Test mode: use card 4343 4343 4343 4345, any future expiry date, and any 3-digit CVC. For a 3D Secure test, use 4120 0000 0000 0007. No real money is charged.</p>
-          }
-          <div class="form-group"><label for="card-name">Name on card</label>
-            <input id="card-name" [(ngModel)]="card.name" autocomplete="cc-name"></div>
-          <div class="form-group"><label for="card-number">Card number</label>
-            <input id="card-number" inputmode="numeric" autocomplete="cc-number" maxlength="23" placeholder="4343 4343 4343 4345" [value]="card.number" (input)="formatCardNumber($event)"></div>
-          <div class="pay-row">
-            <div class="form-group"><label for="card-expiry">Expiry (MM/YY)</label>
-              <input id="card-expiry" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="12/30" [value]="card.expiry" (input)="formatExpiry($event)"></div>
-            <div class="form-group"><label for="card-cvc">CVC</label>
-              <input id="card-cvc" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="123" [(ngModel)]="card.cvc"></div>
-          </div>
-          <button class="btn btn--primary" [disabled]="paying()" (click)="payByCard()">
-            {{ paying() ? 'Processing…' : 'Pay ₱' + o.total.toFixed(2) }}
-          </button>
-          <small class="muted" style="display:block;margin-top:0.6rem">Your card details are sent directly to PayMongo and are never stored on our servers.</small>
-        }
-        @if (payError()) { <p class="form-error" role="alert">{{ payError() }}</p> }
-      }
-    </div>
-  }
-
   @if (needsReceipt) {
     <div class="card receipt-card">
       @if (!o.receiptUrl) {
