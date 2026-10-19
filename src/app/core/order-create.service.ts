@@ -3,7 +3,8 @@ import { collection, doc, getDoc, runTransaction } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { ProductService } from './product.service';
-import { ZONES, FREE_DELIVERY_THRESHOLD, VIP_FREE_SHIPPING_THRESHOLD, PROMO_CODES } from './pricing.config';
+import { MailerService } from './mailer.service';
+import { ZONES, FREE_DELIVERY_THRESHOLD, VIP_FREE_SHIPPING_THRESHOLD, PROMO_CODES, ONLINE_PAYMENT_METHODS } from './pricing.config';
 
 export interface CreateOrderInput {
   items: { productId: string; variantId: string; quantity: number }[];
@@ -36,7 +37,7 @@ export class OrderCreateError extends Error {}
  */
 @Injectable({ providedIn: 'root' })
 export class OrderCreateService {
-  constructor(private fb: FirebaseService, private auth: AuthService, private products: ProductService) {}
+  constructor(private fb: FirebaseService, private auth: AuthService, private products: ProductService, private mailer: MailerService) {}
 
   async createOrder(input: CreateOrderInput): Promise<{ id: string; total: number }> {
     const user = this.auth.currentUser();
@@ -61,6 +62,7 @@ export class OrderCreateService {
 
     const orderRef = doc(collection(this.fb.db, 'orders'));
 
+    let placedOrder: any = null;
     const created = await runTransaction(this.fb.db, async (tx) => {
       // --- Read every product doc first (Firestore transactions require
       // all reads before any writes). ---
@@ -113,6 +115,7 @@ export class OrderCreateService {
         id: orderRef.id,
         userId: user.id,
         userName: user.name || user.email,
+        userEmail: user.email || '',
         items: orderItems,
         productIds: orderItems.map(i => i.productId),
         subtotal,
@@ -126,7 +129,7 @@ export class OrderCreateService {
         deliverySlot: slot,
         paymentMethod: input.paymentMethod,
         status: 'Pending',
-        paymentStatus: isCod ? 'pending_collection' : 'awaiting_manual_verification',
+        paymentStatus: isCod ? 'pending_collection' : (ONLINE_PAYMENT_METHODS.indexOf(input.paymentMethod) >= 0 ? 'awaiting_payment' : 'awaiting_manual_verification'),
         inventoryDeducted: true,
         statusHistory: [{ status: 'Pending', timestamp: new Date().toISOString() }],
         createdAt: new Date().toISOString()
@@ -148,9 +151,11 @@ export class OrderCreateService {
       const newTier = newPoints >= 2000 ? 'gold' : newPoints >= 500 ? 'vip' : (loyalty.tier || 'regular');
       tx.set(loyaltyRef, { points: newPoints, tier: newTier, referrals: loyalty.referrals || 0 }, { merge: true });
 
+      placedOrder = order;
       return { id: orderRef.id, total };
     });
     this.products.clearCache();
+    if (placedOrder) this.mailer.sendOrderStatus(placedOrder, 'Pending');
     return created;
   }
 }

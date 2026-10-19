@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { OrderService } from '../../core/order.service';
 import { AuthService } from '../../core/auth.service';
-import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { NavIconComponent } from '../../shared/nav-icon/nav-icon.component';
 
 @Component({
   selector: 'app-order-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, NotifBellComponent],
+  imports: [CommonModule, RouterLink, PageHeaderComponent, NavIconComponent],
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.css'
 })

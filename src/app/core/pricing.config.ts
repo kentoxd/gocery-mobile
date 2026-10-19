@@ -23,3 +23,6 @@ export const PROMO_CODES: Record<string, { type: 'percent' | 'free_shipping'; va
   SUKI10: { type: 'percent', value: 0.10 },
   FREESHIP: { type: 'free_shipping' }
 };
+
+/** Payment method names that are paid online through PayMongo (same names as the web app). */
+export const ONLINE_PAYMENT_METHODS = ['Credit / Debit Card', 'GCash (Online)', 'Maya (Online)', 'QR Ph'];

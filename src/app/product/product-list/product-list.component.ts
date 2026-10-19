@@ -5,12 +5,12 @@ import { ProductService, Product, CATEGORIES } from '../../core/product.service'
 import { CartService } from '../../core/cart.service';
 import { AuthService } from '../../core/auth.service';
 import { ProductCardComponent } from '../../shared/product-card/product-card.component';
-import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [FormsModule, RouterLink, ProductCardComponent, NotifBellComponent],
+  imports: [FormsModule, RouterLink, ProductCardComponent, PageHeaderComponent, NavIconComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
@@ -21,8 +21,6 @@ export class ProductListComponent implements OnInit {
   loading = signal(true);
   loadError = signal(false);
   inStockOnly = false;
-  menuOpen = signal(false);
-
   search = '';
   categoryId = '';
   sort = '';
@@ -65,11 +63,5 @@ export class ProductListComponent implements OnInit {
     this.sort = '';
     this.inStockOnly = false;
     this.applyFilters();
-  }
-    closeMenu() {
-    this.menuOpen.set(false);
-  }
-    toggleMenu() {
-    this.menuOpen.update(v => !v);
   }
 }
