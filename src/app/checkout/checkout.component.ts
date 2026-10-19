@@ -22,10 +22,21 @@ const ALL_PAYMENT_METHODS = [
   // QR Ph is ready in the code but hidden until PayMongo enables it for your account.
   // To turn it on, add: { id: 'qrph', name: 'QR Ph', icon: '🔳', online: true }
 ];
-const PAYMENT_METHODS = ALL_PAYMENT_METHODS.filter(m => !m.online || !!environment.apiBaseUrl);
+function paymentMethodsList() {
+  const paymentsOnline = !!environment.apiBaseUrl;
+  return ALL_PAYMENT_METHODS.filter(m => {
+    if (m.online && !environment.apiBaseUrl) return false;
+    // When PayMongo is configured, use GCash/Maya (Online) instead of manual merchant QR codes.
+    if (paymentsOnline && (m.id === 'gcash' || m.id === 'maya')) return false;
+    return true;
+  });
+}
 
-function isManualQrPayment(method: string): boolean {
-  return method === 'gcash' || method === 'maya';
+function normalizePaymentId(id: string): string {
+  if (!environment.apiBaseUrl) return id;
+  if (id === 'gcash') return 'gcash_online';
+  if (id === 'maya') return 'maya_online';
+  return id;
 }
 
 @Component({
@@ -39,7 +50,7 @@ export class CheckoutComponent implements OnInit {
   step = signal(1);
   zones = ZONES;
   slots = SLOTS;
-  paymentMethods = PAYMENT_METHODS;
+  paymentMethods = paymentMethodsList();
 
   addressId = '';
   showNewAddressForm = false;
@@ -107,8 +118,9 @@ export class CheckoutComponent implements OnInit {
     } else {
       this.showNewAddressForm = true;
     }
+    const remembered = normalizePaymentId(last.paymentMethod || '');
     for (let i = 0; i < this.paymentMethods.length; i++) {
-      if (this.paymentMethods[i].id === last.paymentMethod) this.paymentMethod = last.paymentMethod;
+      if (this.paymentMethods[i].id === remembered) this.paymentMethod = remembered;
     }
     this.regions = this.psgc.getRegions();
   }

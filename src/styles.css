@@ -167,6 +167,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* Online payment (card / QR Ph) */
 .pay-card { border: 2px solid var(--color-primary); background: #f6fbf8; margin-bottom: 1rem; }
+.pay-card .btn { width: 100%; min-height: 48px; }
+.pay-card .form-group input { font-size: 16px; }
 .pay-title { margin: 0.5rem 0; font-size: 1rem; }
 .pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 .pay-qr { width: 100%; max-width: 280px; height: auto; border: 1px solid var(--color-border); border-radius: var(--radius); background: #fff; }

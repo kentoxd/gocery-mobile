@@ -72,7 +72,9 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       // Coming back from the 3D Secure page: check if the payment went through.
       if (this.route.snapshot.queryParamMap.get('pm') === 'return') {
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
-        this.waitForPayment(8, false);
+        this.paying.set(true);
+        await this.waitForPayment(8, false);
+        this.paying.set(false);
       }
     }
   }
@@ -97,15 +99,27 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   async payByGcash() {
     const o = this.order();
+    if (!o) return;
     this.payError.set('');
     this.paying.set(true);
-    const result = await this.pay.startEwallet(o.id);
-    if (!result.success) {
-      this.payError.set(result.error);
+    try {
+      const result = await this.pay.startEwallet(o.id);
+      if (!result.success) {
+        this.payError.set(result.error || 'Could not start payment. Please try again.');
+        this.paying.set(false);
+        return;
+      }
+      if (!result.data?.redirectUrl) {
+        this.payError.set('Payment server did not return a redirect URL.');
+        this.paying.set(false);
+        return;
+      }
+      window.location.href = result.data.redirectUrl;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Payment failed. Please try again.';
+      this.payError.set(message);
       this.paying.set(false);
-      return;
     }
-    window.location.href = result.data.redirectUrl;
   }
 
   get isQr(): boolean {

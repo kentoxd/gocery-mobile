@@ -6,7 +6,7 @@ export interface CardInput { name: string; number: string; expiry: string; cvc: 
 export interface CardResult { success: boolean; status?: 'succeeded' | 'redirect' | 'processing'; redirectUrl?: string; error?: string; }
 
 /**
- * Online payments through PayMongo (card and QR Ph).
+ * Online payments through PayMongo (card, GCash/Maya e-wallet, and QR Ph).
  * Our server (environment.apiBaseUrl) creates the payment from the saved order, so the amount can't be changed here.
  * Card details go straight from the app to PayMongo with the PUBLIC key; they never touch our server.
  */
@@ -100,6 +100,12 @@ export class PaymentService {
     }
     const lastError = attrs.last_payment_error;
     return { success: false, error: (lastError && (lastError.failed_message || lastError.message)) || 'The card was declined. Please try another card.' };
+  }
+
+  /** GCash / Maya: server returns a PayMongo redirect URL for the customer to approve payment. */
+  startEwallet(orderId: string) {
+    const returnUrl = window.location.origin + '/orders/' + encodeURIComponent(orderId) + '?pm=return';
+    return this.server('POST', '/api/payments/ewallet', { orderId, returnUrl });
   }
 
   startQr(orderId: string) {
