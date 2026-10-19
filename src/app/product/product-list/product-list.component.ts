@@ -2,14 +2,14 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ProductService, Product, CATEGORIES } from '../../core/product.service';
-import { CartService } from '../../core/cart.service';
 import { ProductCardComponent } from '../../shared/product-card/product-card.component';
-import { NotifBellComponent } from '../../shared/notif-bell/notif-bell.component';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
+import { NavIconComponent } from '../../shared/nav-icon/nav-icon.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [FormsModule, RouterLink, ProductCardComponent, NotifBellComponent],
+  imports: [FormsModule, RouterLink, ProductCardComponent, PageHeaderComponent, NavIconComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })
@@ -20,13 +20,11 @@ export class ProductListComponent implements OnInit {
   loading = signal(true);
   loadError = signal(false);
   inStockOnly = false;
-  menuOpen = signal(false);
-
   search = '';
   categoryId = '';
   sort = '';
 
-  constructor(private products: ProductService, public cart: CartService, private route: ActivatedRoute) {}
+  constructor(private products: ProductService, private route: ActivatedRoute) {}
 
 
   async ngOnInit() {
@@ -64,11 +62,5 @@ export class ProductListComponent implements OnInit {
     this.sort = '';
     this.inStockOnly = false;
     this.applyFilters();
-  }
-    closeMenu() {
-    this.menuOpen.set(false);
-  }
-    toggleMenu() {
-    this.menuOpen.update(v => !v);
   }
 }

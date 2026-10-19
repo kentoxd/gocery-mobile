@@ -1,30 +1,6 @@
 <div class="page">
-  <div class="page-header">
-    <button class="icon-btn" (click)="toggleMenu()" aria-label="Open menu">☰ Menu</button>
-    <h1>Shop</h1>
-    <app-notif-bell style="margin-left:auto"></app-notif-bell>
-  </div>
-  @if (menuOpen()) {
-    <div class="menu-overlay" (click)="closeMenu()">
-      <nav class="menu-panel" (click)="$event.stopPropagation()">
-        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
-        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
-          <span>🛒</span>Cart
-          @if (cart.itemCount() > 0) {
-          <span class="badge">{{ cart.itemCount() }}</span>
-          }
-        </a>
-        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
-        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
-        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
-        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
-        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
-        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
-        <a routerLink="/about" (click)="closeMenu()">ℹ️ About Us</a>
-        <button class="menu-close" (click)="closeMenu()">Close</button>
-      </nav>
-    </div>
-  }
+  <app-page-header title="Shop"></app-page-header>
+
   <div class="filters">
     <input class="input-pill" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
     <div class="filter-row">
@@ -56,16 +32,16 @@
     </div>
   } @else if (loadError()) {
     <div class="empty-state">
-      <span class="empty-state__icon">⚠️</span>
+      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="alert" size="lg" /></div>
       <h2>We couldn't load the products</h2>
       <p>Please check your connection and try again.</p>
-      <button class="btn btn--primary" (click)="load()">Try again</button>
+      <button type="button" class="btn btn--primary" (click)="load()">Try again</button>
     </div>
   } @else if (!results().length) {
     <div class="empty-state">
-      <span class="empty-state__icon">🔍</span>
+      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="search" size="lg" /></div>
       <p>No products match your search. Try a different word, or clear your filters.</p>
-      <button class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
+      <button type="button" class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
     </div>
   } @else {
     <div class="grid">
