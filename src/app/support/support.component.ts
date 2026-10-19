@@ -5,11 +5,12 @@ import { collection, addDoc } from 'firebase/firestore';
 import { FirebaseService } from '../core/firebase.service';
 import { AuthService } from '../core/auth.service';
 import { CmsService, FaqItem } from '../core/cms.service';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeaderComponent],
   templateUrl: './support.component.html',
   styleUrl: './support.component.css'
 })
@@ -22,7 +23,7 @@ export class SupportComponent implements OnInit {
   error = signal('');
 
   faqs = signal<FaqItem[]>([
-    { q: 'What areas do you deliver to?', a: 'Metro Manila and Rizal Province, split into delivery zones with different fees shown at checkout.' },
+    { q: 'What areas do you deliver to?', a: 'Metro Manila and Rizal Province. Delivery fee is based on the address you choose at checkout.' },
     { q: 'When will my order arrive?', a: 'Orders placed before 7:30 PM are delivered the next day, based on the time slot you choose at checkout.' },
     { q: 'What payment methods are accepted?', a: 'Cash on Delivery, GCash, Maya, and Credit/Debit Card.' },
     { q: 'How do I track my order?', a: 'Go to My Orders in your Profile tab — each order shows its live status.' }

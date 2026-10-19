@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReviewService, Review } from '../core/review.service';
 import { ProductService, Product } from '../core/product.service';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 /**
  * All-reviews grid — mobile equivalent of the web app's pages/reviews.html.
@@ -12,7 +13,7 @@ import { ProductService, Product } from '../core/product.service';
 @Component({
   selector: 'app-reviews',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './reviews.component.html',
   styleUrl: './reviews.component.css'
 })

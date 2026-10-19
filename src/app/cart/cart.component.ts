@@ -7,18 +7,18 @@ import { ProductService, Product } from '../core/product.service';
 import { ToastService } from '../core/toast.service';
 import { FREE_DELIVERY_THRESHOLD } from '../core/pricing.config';
 import { ProductCardComponent } from '../shared/product-card/product-card.component';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductCardComponent],
+  imports: [CommonModule, RouterLink, ProductCardComponent, PageHeaderComponent],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
 export class CartComponent implements OnInit {
   popular = signal<Product[]>([]);
   threshold = FREE_DELIVERY_THRESHOLD;
-  menuOpen = signal(false);
 
   constructor(
     public cart: CartService,
@@ -63,11 +63,5 @@ export class CartComponent implements OnInit {
       return;
     }
     this.router.navigate(['/checkout']);
-  }
-      closeMenu() {
-    this.menuOpen.set(false);
-  }
-    toggleMenu() {
-    this.menuOpen.update(v => !v);
   }
 }

@@ -1,8 +1,5 @@
 <div class="page" *ngIf="order() as o">
-  <div class="page-header">
-    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
-    <h1>Order {{ o.id.slice(0, 8) }}</h1>
-  </div>
+  <app-page-header [title]="'Order ' + o.id.slice(0, 8)" [showBack]="true"></app-page-header>
 
   <p class="status-msg">{{ statusMessage }}</p>
 

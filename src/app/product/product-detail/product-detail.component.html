@@ -1,8 +1,5 @@
 <div class="page" *ngIf="product() as p">
-  <div class="page-header">
-    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
-    <h1>{{ p.name }}</h1>
-  </div>
+  <app-page-header [title]="p.name" [showBack]="true"></app-page-header>
 
   <div class="detail-image">
     @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name"> } @else { <span>{{ p.image }}</span> }

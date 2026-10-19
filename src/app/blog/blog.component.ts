@@ -6,6 +6,7 @@ import { CartService } from '../core/cart.service';
 import { ToastService } from '../core/toast.service';
 import { MiniCartService } from '../core/mini-cart.service';
 import { optimizeImageUrl } from '../core/image-url.util';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 const FAVORITES_KEY = 'gocery_recipe_favorites';
 
@@ -13,7 +14,7 @@ const FAVORITES_KEY = 'gocery_recipe_favorites';
 @Component({
   selector: 'app-blog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageHeaderComponent],
   templateUrl: './blog.component.html',
   styleUrl: './blog.component.css'
 })

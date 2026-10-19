@@ -1,7 +1,8 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../core/cart.service';
+import { AuthService } from '../../core/auth.service';
 import { NotifBellComponent } from '../notif-bell/notif-bell.component';
 
 @Component({
@@ -16,13 +17,15 @@ export class PageHeaderComponent {
   /** Drill-down screens (checkout, product detail): show ← and keep ☰ for global nav. */
   @Input() showBack = false;
   @Input() showNotif = true;
+  @Output() back = new EventEmitter<void>();
 
   menuOpen = signal(false);
 
-  constructor(public cart: CartService, private location: Location) {}
+  constructor(public cart: CartService, public auth: AuthService, private location: Location) {}
 
   goBack() {
-    this.location.back();
+    if (this.back.observed) this.back.emit();
+    else this.location.back();
   }
 
   openMenu() {

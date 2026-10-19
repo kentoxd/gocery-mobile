@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService, Product } from '../../core/product.service';
@@ -9,11 +9,12 @@ import { AuthService } from '../../core/auth.service';
 import { ReviewService, Review } from '../../core/review.service';
 import { ToastService } from '../../core/toast.service';
 import { MiniCartService } from '../../core/mini-cart.service';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.css'
 })
@@ -43,14 +44,9 @@ export class ProductDetailComponent implements OnInit {
     private wishlist: WishlistService,
     public auth: AuthService,
     private reviewsSvc: ReviewService,
-    private location: Location,
     private toast: ToastService,
     private mini: MiniCartService
   ) {}
-
-  goBack() {
-    this.location.back();
-  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;

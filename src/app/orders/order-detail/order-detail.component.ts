@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../core/order.service';
@@ -8,6 +8,7 @@ import { NotificationService } from '../../core/notification.service';
 import { PaymentService } from '../../core/payment.service';
 import { AuthService } from '../../core/auth.service';
 import { ONLINE_PAYMENT_METHODS } from '../../core/pricing.config';
+import { PageHeaderComponent } from '../../shared/page-header/page-header.component';
 
 const STATUS_STEPS = ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered'];
 
@@ -24,7 +25,7 @@ const STATUS_MESSAGES: Record<string, string> = {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeaderComponent],
   templateUrl: './order-detail.component.html',
   styleUrl: './order-detail.component.css'
 })
@@ -48,16 +49,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private orderService: OrderService,
-    private location: Location,
     private toast: ToastService,
     private notif: NotificationService,
     public pay: PaymentService,
     private auth: AuthService
   ) {}
-
-  goBack() {
-    this.location.back();
-  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -84,7 +80,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   get isOnline(): boolean {
-    return ONLINE_PAYMENT_METHODS.indexOf(this.order()?.paymentMethod) >= 0;
+    const method = String(this.order()?.paymentMethod || '');
+    if (ONLINE_PAYMENT_METHODS.indexOf(method) >= 0) return true;
+    const lower = method.toLowerCase();
+    return lower === 'card' || (lower.includes('credit') && lower.includes('card'));
   }
 
   get isGcash(): boolean {

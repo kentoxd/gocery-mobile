@@ -1,8 +1,5 @@
 <div class="page">
-  <div class="page-header">
-    <button class="page-header__back" (click)="goBack()" aria-label="Back">←</button>
-    <h1>Checkout</h1>
-  </div>
+  <app-page-header title="Checkout" [showBack]="true" (back)="goBack()"></app-page-header>
 
   @if (showQrPanel()) {
     <div class="card">
@@ -31,7 +28,7 @@
       <h2 class="section-title">Shipping Address</h2>
       @for (a of auth.currentUser()?.addresses; track a.id) {
         <label class="option">
-          <input type="radio" name="address" [value]="a.id" [(ngModel)]="addressId" (change)="zoneId = a.zoneId || zoneId">
+          <input type="radio" name="address" [value]="a.id" [(ngModel)]="addressId" (change)="syncZoneFromAddress(a)">
           <div><strong>{{ a.label || 'Home' }}</strong><br><span class="muted">{{ a.street }}, {{ a.city }}</span></div>
         </label>
       }
@@ -104,12 +101,6 @@
       <h2 class="section-title">Delivery Schedule</h2>
       <p class="muted">Delivery date: <strong>{{ deliveryDate }}</strong></p>
       <div class="form-group">
-        <label>Delivery Zone</label>
-        <select [(ngModel)]="zoneId">
-          @for (z of zones; track z.id) { <option [value]="z.id">{{ z.name }} (₱{{ z.fee }})</option> }
-        </select>
-      </div>
-      <div class="form-group">
         <label>Time Slot</label>
         @for (s of slots; track s.id) {
           <label class="option">
@@ -124,35 +115,35 @@
     </div>
   }
 
-  @if (step() === 3) {
-    <div class="card">
-      <h2 class="section-title">Payment Method</h2>
-      @for (m of paymentMethods; track m.id) {
-        <label class="option">
-          <input type="radio" name="payment" [value]="m.id" [(ngModel)]="paymentMethod"> {{ m.icon }} {{ m.name }}
-        </label>
-      }
-      @if (paymentMethod === 'card' || paymentMethod === 'gcash_online' || paymentMethod === 'maya_online' || paymentMethod === 'qrph') {
-        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">You will pay on the next screen, right after you place the order.</p>
-      }
-      @if (paymentMethod === 'gcash' || paymentMethod === 'maya') {
-        <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ paymentMethod === 'gcash' ? 'GCash' : 'Maya' }} payments are verified manually by the seller after you scan their QR code.</p>
-      }
-
-      <div class="form-group" style="margin-top:1rem">
-        <label>Promo Code</label>
-        <div class="promo-row">
-          <input [(ngModel)]="promoInput" placeholder="Enter code">
-          <button class="btn btn--outline btn--sm" (click)="applyPromo()">Apply</button>
-        </div>
-      </div>
-      @if (error()) { <p class="form-error">{{ error() }}</p> }
-    </div>
-    <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn--outline" (click)="step.set(2)">Back</button>
-      <button class="btn btn--primary" (click)="step.set(4)">Review Order</button>
-    </div>
+ @if (step() === 3) {
+  <h2 class="section-title">Payment Method</h2>
+  @for (m of paymentMethods; track m.id) {
+    <label class="option">
+      <input type="radio" name="payment" [value]="m.id" [(ngModel)]="paymentMethod"> {{ m.icon }} {{ m.name }}
+    </label>
   }
+
+  @if (paymentMethod === 'gcash_online' || paymentMethod === 'maya_online' || paymentMethod === 'qrph') {
+    <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">You will pay on the next screen, right after you place the order.</p>
+  }
+  @if (paymentMethod === 'gcash' || paymentMethod === 'maya') {
+    <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">{{ paymentMethod === 'gcash' ? 'GCash' : 'Maya' }} payments are verified manually by the seller after you scan their QR code.</p>
+  }
+
+  <div class="form-group" style="margin-top:1rem">
+    <label>Promo Code</label>
+    <div class="promo-row">
+      <input [(ngModel)]="promoInput" placeholder="Enter code">
+      <button class="btn btn--outline btn--sm" (click)="applyPromo()">Apply</button>
+    </div>
+  </div>
+  @if (error()) { <p class="form-error">{{ error() }}</p> }
+
+  <div class="btn-row" style="margin-top:1rem">
+    <button class="btn btn--outline" (click)="step.set(2)">Back</button>
+    <button class="btn btn--primary" (click)="goToReview()">Review Order</button>
+  </div>
+}
 
   @if (step() === 4) {
     <div class="card">

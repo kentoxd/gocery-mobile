@@ -7,9 +7,11 @@ import { AuthService } from '../core/auth.service';
 import { OrderCreateService, OrderCreateError } from '../core/order-create.service';
 import { PsgcService, PsgcNode } from '../core/psgc.service';
 import { CmsService } from '../core/cms.service';
+import { PaymentService } from '../core/payment.service';
 import { ZONES, SLOTS, PROMO_CODES, FREE_DELIVERY_THRESHOLD } from '../core/pricing.config';
 import { environment } from '../../environments/environment';
 import { LocationPickerComponent, PickedLocation } from './location-picker/location-picker.component';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 const ALL_PAYMENT_METHODS = [
   { id: 'cod', name: 'Cash on Delivery', icon: '💵', online: false },
@@ -42,7 +44,7 @@ function normalizePaymentId(id: string): string {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, LocationPickerComponent],
+  imports: [CommonModule, FormsModule, LocationPickerComponent, PageHeaderComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css'
 })
@@ -58,6 +60,7 @@ export class CheckoutComponent implements OnInit {
   slotId = SLOTS[0].id;
   deliveryDate = this.nextDeliveryDate();
   paymentMethod = 'cod';
+  card = { name: '', number: '', expiry: '', cvc: '' };
   promoInput = '';
   promoCode = '';
   discount = 0;
@@ -93,6 +96,7 @@ export class CheckoutComponent implements OnInit {
     private orderCreate: OrderCreateService,
     private psgc: PsgcService,
     private cms: CmsService,
+    private pay: PaymentService,
     private router: Router,
     private location: Location
   ) {}
@@ -114,7 +118,8 @@ export class CheckoutComponent implements OnInit {
       }
       const chosen = remembered || user.addresses[0];
       this.addressId = chosen.id;
-      if (chosen.zoneId) this.zoneId = chosen.zoneId;
+      this.syncZoneFromAddress(chosen);
+      this.card.name = user.name || '';
     } else {
       this.showNewAddressForm = true;
     }
@@ -242,8 +247,50 @@ export class CheckoutComponent implements OnInit {
     });
     const user = this.auth.currentUser();
     this.addressId = user?.addresses?.[user.addresses.length - 1]?.id || '';
-    this.zoneId = this.newAddress.zoneId;
+    this.syncZoneFromAddress(user?.addresses?.[user.addresses.length - 1]);
     this.showNewAddressForm = false;
+  }
+
+  syncZoneFromAddress(address: any) {
+    this.zoneId = this.resolveZoneId(address);
+  }
+
+  private resolveZoneId(address: any): string {
+    if (address?.zoneId && this.zones.some(z => z.id === address.zoneId)) return address.zoneId;
+    const text = String(address?.region || address?.city || address?.province || '').toLowerCase();
+    if (text.includes('rizal')) return 'rizal';
+    return 'metro-manila';
+  }
+
+  formatCardNumber(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 19);
+    let out = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (i > 0 && i % 4 === 0) out += ' ';
+      out += digits[i];
+    }
+    this.card.number = out;
+    input.value = out;
+  }
+
+  formatExpiry(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 4);
+    const out = digits.length > 2 ? digits.slice(0, 2) + '/' + digits.slice(2) : digits;
+    this.card.expiry = out;
+    input.value = out;
+  }
+
+  private cardReady(): boolean {
+    const digits = this.card.number.replace(/\D/g, '');
+    return !!this.card.name.trim() && digits.length >= 13 && this.card.expiry.length >= 5 && this.card.cvc.trim().length >= 3;
+  }
+
+  goToReview() {
+
+    this.error.set('');
+    this.step.set(4);
   }
 
   async placeOrder() {
@@ -253,6 +300,11 @@ export class CheckoutComponent implements OnInit {
     this.error.set('');
 
     const method = this.paymentMethods.find(m => m.id === this.paymentMethod);
+
+
+    const selected = this.auth.currentUser()?.addresses?.find((a: any) => a.id === this.addressId);
+    this.syncZoneFromAddress(selected);
+
     localStorage.setItem('gocery_last_checkout', JSON.stringify({ addressId: this.addressId, paymentMethod: this.paymentMethod }));
     const orderPayload = {
       items: this.cart.selectedItems().map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
@@ -279,7 +331,27 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    // Card and QR Ph are paid on the order screen, right after the order is placed.
+    if (this.paymentMethod === 'card') {
+      this.cart.removePaidItems();
+      const result = await this.pay.payWithCard(order.id, {
+        name: this.card.name.trim(), number: this.card.number, expiry: this.card.expiry, cvc: this.card.cvc.trim()
+      }, user.email || '');
+      this.card.number = '';
+      this.card.cvc = '';
+      if (result.success && result.status === 'redirect' && result.redirectUrl) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
+      if (!result.success) {
+        this.placing.set(false);
+        this.router.navigate(['/orders', order.id], { queryParams: { pay: 1 } });
+        return;
+      }
+      this.router.navigate(['/orders', order.id]);
+      return;
+    }
+
+    // E-wallet / QR Ph are paid on the order screen, right after the order is placed.
     if (method && method.online) {
       this.cart.removePaidItems();
       this.router.navigate(['/orders', order.id], { queryParams: { pay: 1 } });

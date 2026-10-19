@@ -18,21 +18,40 @@
 @if (menuOpen()) {
   <div class="side-menu-overlay" (click)="closeMenu()">
     <nav class="side-menu-panel" (click)="$event.stopPropagation()">
-      <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
-      <a routerLink="/cart" routerLinkActive="active" class="side-menu-cart">
-        <span>🛒</span> Cart
-        @if (cart.itemCount() > 0) {
-          <span class="badge">{{ cart.itemCount() }}</span>
-        }
-      </a>
-      <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
-      <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
-      <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
-      <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
-      <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
-      <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
-      <a routerLink="/about" (click)="closeMenu()">ℹ️ About Us</a>
-      <button type="button" class="side-menu-close" (click)="closeMenu()">Close</button>
+      @if (auth.currentUser(); as user) {
+        <div class="menu-profile">
+          <div class="menu-profile__avatar">
+            <img
+              src="https://res.cloudinary.com/m0uovtom/image/upload/v1792403571/Sample_User_Icon.png"
+              alt="Profile Picture"
+            />
+          </div>
+          <div class="menu-profile__info">
+            <strong>{{ user.name }}</strong>
+            <span>{{ user.email }}</span>
+            <span>{{ user.phone || 'No phone number' }}</span>
+          </div>
+          <a routerLink="/profile" class="menu-profile__edit" (click)="closeMenu()">Edit Profile</a>
+        </div>
+      }
+
+      <div class="side-menu-links">
+        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/cart" routerLinkActive="active" class="side-menu-cart" (click)="closeMenu()">
+          <span>🛒</span> Cart
+          @if (cart.itemCount() > 0) {
+            <span class="badge">{{ cart.itemCount() }}</span>
+          }
+        </a>
+        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
+        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
+        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
+        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
+        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
+        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
+        <a routerLink="/about" (click)="closeMenu()">ℹ️ About Us</a>
+        <button type="button" class="side-menu-close" (click)="closeMenu()">Close</button>
+      </div>
     </nav>
   </div>
 }

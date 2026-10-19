@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { OrderService } from '../core/order.service';
 import { AuthService } from '../core/auth.service';
 import { NotificationService, NOTIF_SEEN_KEY } from '../core/notification.service';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 interface Notification {
   orderId: string;
@@ -16,7 +17,7 @@ interface Notification {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.css'
 })
