@@ -2,8 +2,9 @@
 .avatar {
   width: 52px; height: 52px; flex-shrink: 0; border-radius: 999px;
   background: linear-gradient(135deg,#f0fdf4,#ecfdf5); display: flex; align-items: center;
-  justify-content: center; font-size: 1.6rem;
+  justify-content: center; color: var(--color-primary); border: 1px solid #dcfce7;
 }
+.profile-logout { margin-top: 1.25rem; }
 .profile-info { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
 .profile-info--edit { gap: 0; }
 .btn--sm {

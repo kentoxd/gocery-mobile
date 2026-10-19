@@ -4,6 +4,7 @@ import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { CloudinaryService } from './cloudinary.service';
 import { ProductService } from './product.service';
+import { MailerService } from './mailer.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -11,7 +12,8 @@ export class OrderService {
     private fb: FirebaseService,
     private auth: AuthService,
     private cloud: CloudinaryService,
-    private products: ProductService
+    private products: ProductService,
+    private mailer: MailerService
   ) {}
 
   async getMyOrders(userId: string) {
@@ -32,6 +34,7 @@ export class OrderService {
     const user = this.auth.currentUser();
     if (!user) return { success: false, error: 'You must be logged in.' };
     const orderRef = doc(this.fb.db, 'orders', orderId);
+    let cancelled: any = null;
 
     try {
       await runTransaction(this.fb.db, async (tx) => {
@@ -57,6 +60,7 @@ export class OrderService {
           status: 'Cancelled', timestamp: new Date().toISOString(), note: 'Cancelled by customer'
         }]);
         tx.update(orderRef, { status: 'Cancelled', statusHistory: history });
+        cancelled = { ...order, id: orderId, status: 'Cancelled' };
 
         for (let i = 0; i < productDocs.length; i++) {
           if (!productDocs[i].exists()) continue;
@@ -68,6 +72,7 @@ export class OrderService {
         }
       });
       this.products.clearCache();
+      if (cancelled) this.mailer.sendOrderStatus(cancelled, 'Cancelled', 'Cancelled by customer');
       return { success: true };
     } catch (e: any) {
       return { success: false, error: e.message || 'Could not cancel the order.' };

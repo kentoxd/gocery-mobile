@@ -1,21 +1,18 @@
 <div class="page">
-  <div class="page-header">
-    <h1>My Orders</h1>
-    <app-notif-bell style="margin-left:auto"></app-notif-bell>
-  </div>
+  <app-page-header title="My Orders"></app-page-header>
 
   @if (loading()) {
     @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!orders().length) {
     <div class="empty-state">
-      <span class="empty-state__icon">📦</span>
+      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="orders" size="lg" /></div>
       <p>No orders yet. Your orders will show up here once you check out.</p>
       <a routerLink="/shop" class="btn btn--primary">Start Shopping</a>
     </div>
   } @else {
     @for (o of orders(); track o.id) {
       <a [routerLink]="['/orders', o.id]" class="card list-row">
-        <div class="list-row__icon">📦</div>
+        <div class="list-row__icon"><app-nav-icon name="orders" /></div>
         <div class="list-row__body">
           <strong>Order {{ o.id.slice(0, 8) }}</strong>
           <p class="muted">{{ o.items.length }} item(s) — ₱{{ o.total.toFixed(2) }}</p>
