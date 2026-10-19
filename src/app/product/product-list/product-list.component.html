@@ -4,63 +4,27 @@
     <h1>Shop</h1>
     <app-notif-bell style="margin-left:auto"></app-notif-bell>
   </div>
-@if (menuOpen()) {
-  <div class="menu-overlay" (click)="closeMenu()">
-    <nav class="menu-panel" (click)="$event.stopPropagation()">
-
-      @if (auth.currentUser(); as user) {
-        <div class="menu-profile">
-          <div class="menu-profile__avatar">
-            <img
-              src="https://res.cloudinary.com/m0uovtom/image/upload/v1792403571/Sample_User_Icon.png"
-              alt="Profile Picture"
-            />
-          </div>
-
-          <div class="menu-profile__info">
-            <strong>{{ user.name }}</strong>
-            <span>{{ user.email }}</span>
-            <span>{{ user.phone || 'No phone number' }}</span>
-          </div>
-
-          <a
-            routerLink="/profile"
-            class="menu-profile__edit"
-            (click)="closeMenu()"
-          >
-            Edit Profile
-          </a>
-        </div>
-      }
-
-      <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
-
-      <a
-        routerLink="/cart"
-        routerLinkActive="active"
-        class="cart-link"
-        (click)="closeMenu()"
-      >
-        <span>🛒</span> Cart
-        @if (cart.itemCount() > 0) {
+  @if (menuOpen()) {
+    <div class="menu-overlay" (click)="closeMenu()">
+      <nav class="menu-panel" (click)="$event.stopPropagation()">
+        <a routerLink="/home" (click)="closeMenu()">🏠 Home</a>
+        <a routerLink="/cart" routerLinkActive="active" class="cart-link">
+          <span>🛒</span>Cart
+          @if (cart.itemCount() > 0) {
           <span class="badge">{{ cart.itemCount() }}</span>
-        }
-      </a>
-
-      <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
-      <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
-      <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
-      <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
-      <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
-      <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
-      <a routerLink="/about" (click)="closeMenu()">ℹ️ About Us</a>
-
-      <button class="menu-close" (click)="closeMenu()">Close</button>
-    </nav>
-  </div>
-}
-  <app-page-header title="Shop"></app-page-header>
-
+          }
+        </a>
+        <a routerLink="/shop" (click)="closeMenu()">🛍️ Shop</a>
+        <a routerLink="/orders" (click)="closeMenu()">📦 My Orders</a>
+        <a routerLink="/wishlist" (click)="closeMenu()">❤️ Wishlist</a>
+        <a routerLink="/notifications" (click)="closeMenu()">🔔 Notifications</a>
+        <a routerLink="/profile" (click)="closeMenu()">👤 Profile</a>
+        <a routerLink="/support" (click)="closeMenu()">💬 Support</a>
+        <a routerLink="/about" (click)="closeMenu()">ℹ️ About Us</a>
+        <button class="menu-close" (click)="closeMenu()">Close</button>
+      </nav>
+    </div>
+  }
   <div class="filters">
     <input class="input-pill" [(ngModel)]="search" (ngModelChange)="applyFilters()" placeholder="Search products…">
     <div class="filter-row">
@@ -92,16 +56,16 @@
     </div>
   } @else if (loadError()) {
     <div class="empty-state">
-      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="alert" size="lg" /></div>
+      <span class="empty-state__icon">⚠️</span>
       <h2>We couldn't load the products</h2>
       <p>Please check your connection and try again.</p>
-      <button type="button" class="btn btn--primary" (click)="load()">Try again</button>
+      <button class="btn btn--primary" (click)="load()">Try again</button>
     </div>
   } @else if (!results().length) {
     <div class="empty-state">
-      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="search" size="lg" /></div>
+      <span class="empty-state__icon">🔍</span>
       <p>No products match your search. Try a different word, or clear your filters.</p>
-      <button type="button" class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
+      <button class="btn btn--primary" (click)="clearFilters()">Clear filters</button>
     </div>
   } @else {
     <div class="grid">

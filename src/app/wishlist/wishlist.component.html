@@ -1,28 +1,30 @@
 <div class="page">
-  <app-page-header title="My Wishlist"></app-page-header>
+  <div class="page-header">
+    <h1>My Wishlist</h1>
+  </div>
 
   @if (loading()) {
     @for (n of [1, 2, 3]; track n) { <div class="skeleton skeleton--row" aria-hidden="true"></div> }
   } @else if (!products().length) {
     <div class="empty-state">
-      <div class="empty-state__icon-wrap" aria-hidden="true"><app-nav-icon name="wishlist" size="lg" /></div>
+      <span class="empty-state__icon">🤍</span>
       <p>Your wishlist is empty.</p>
       <a routerLink="/shop" class="btn btn--primary">Browse Products</a>
     </div>
   } @else {
     @for (p of products(); track p.id) {
       <div class="card wishlist-item">
-        <a [routerLink]="['/product', p.id]" class="wishlist-item__main">
-          <div class="wishlist-item__image">
-            @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
+        <div class="wishlist-item__image">
+          @if (p.imageUrl) { <img [src]="p.imageUrl" [alt]="p.name" loading="lazy"> } @else { <span>{{ p.image }}</span> }
+        </div>
+        <div class="wishlist-item__info">
+          <strong>{{ p.name }}</strong>
+          <span class="price">₱{{ p.variants[0].price.toFixed(2) }} <small class="muted">/ {{ p.variants[0].unit }}</small></span>
+          <div class="actions">
+            <button class="btn btn--primary btn--sm" (click)="moveToCart(p)">Add to Cart</button>
+            <button class="btn btn--outline btn--sm" (click)="remove(p.id)">Remove</button>
           </div>
-          <div>
-            <strong>{{ p.name }}</strong>
-            <p class="price">₱{{ p.variants[0].price.toFixed(2) }}</p>
-          </div>
-        </a>
-        <button type="button" class="btn btn--primary btn--sm" (click)="addToCart(p)">Add to Cart</button>
-        <button type="button" class="remove-btn" (click)="remove(p.id)">Remove</button>
+        </div>
       </div>
     }
   }

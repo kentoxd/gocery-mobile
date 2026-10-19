@@ -1,14 +1,13 @@
 import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
-import { PageHeaderComponent } from '../shared/page-header/page-header.component';
-import { NavIconComponent } from '../shared/nav-icon/nav-icon.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule, RouterLink, PageHeaderComponent, NavIconComponent],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
